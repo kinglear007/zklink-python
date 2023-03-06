@@ -1,7 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
 from typing import Optional
-from zksync_sdk.types.signatures import TxEthSignature
+from zklink_sdk.types.signatures import TxEthSignature
 
 
 class ChangePubKeyTypes(Enum):
@@ -66,12 +66,12 @@ class Toggle2FA:
 
 def get_toggle_message(require_2fa: bool, time_stamp: int) -> str:
     if require_2fa:
-        msg = f"By signing this message, you are opting into Two-factor Authentication protection by the zkSync " \
+        msg = f"By signing this message, you are opting into Two-factor Authentication protection by the zkLink " \
               f"Server.\n" \
               f"Transactions now require signatures by both your L1 and L2 private key.\n" \
               f"Timestamp: {time_stamp}"
     else:
-        msg = f"You are opting out of Two-factor Authentication protection by the zkSync Server.\n" \
+        msg = f"You are opting out of Two-factor Authentication protection by the zkLink Server.\n" \
               f"Transactions now only require signatures by your L2 private key.\n" \
               f"BY SIGNING THIS MESSAGE, YOU ARE TRUSTING YOUR WALLET CLIENT TO KEEP YOUR L2 PRIVATE KEY SAFE!\n" \
               f"Timestamp: {time_stamp}"

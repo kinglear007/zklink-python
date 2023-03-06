@@ -3,16 +3,16 @@ from decimal import Decimal
 from fractions import Fraction
 from typing import List, Optional, Tuple, Union
 
-from zksync_sdk.ethereum_provider import EthereumProvider
-from zksync_sdk.ethereum_signer import EthereumSignerInterface
-from zksync_sdk.types import (ChangePubKey, ChangePubKeyCREATE2, ChangePubKeyEcdsa,
+from zklink_sdk.ethereum_provider import EthereumProvider
+from zklink_sdk.ethereum_signer import EthereumSignerInterface
+from zklink_sdk.types import (ChangePubKey, ChangePubKeyCREATE2, ChangePubKeyEcdsa,
                               ChangePubKeyTypes, EncodedTx, ForcedExit, Token, TokenLike,
                               Tokens, TransactionWithSignature, Transfer, TxEthSignature,
                               Withdraw, MintNFT, WithdrawNFT, NFT, Order, Swap, RatioType,
                               token_ratio_to_wei_ratio, get_toggle_message, get_toggle_message_with_pub, Toggle2FA)
-from zksync_sdk.zksync_provider import FeeTxType, ZkSyncProviderInterface
-from zksync_sdk.zksync_signer import ZkSyncSigner
-from zksync_sdk.zksync_provider.transaction import Transaction
+from zklink_sdk.zklink_provider import FeeTxType, ZkLinkProviderInterface
+from zklink_sdk.zklink_signer import ZkLinkSigner
+from zklink_sdk.zklink_provider.transaction import Transaction
 
 DEFAULT_VALID_FROM = 0
 DEFAULT_VALID_UNTIL = 2 ** 32 - 1
@@ -31,8 +31,8 @@ class AmountsMissing(WalletError):
 
 
 class Wallet:
-    def __init__(self, ethereum_provider: EthereumProvider, zk_signer: ZkSyncSigner,
-                 eth_signer: EthereumSignerInterface, provider: ZkSyncProviderInterface):
+    def __init__(self, ethereum_provider: EthereumProvider, zk_signer: ZkLinkSigner,
+                 eth_signer: EthereumSignerInterface, provider: ZkLinkProviderInterface):
         self.ethereum_provider = ethereum_provider
         self.zk_signer = zk_signer
         self.eth_signer = eth_signer

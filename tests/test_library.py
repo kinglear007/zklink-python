@@ -1,12 +1,12 @@
 import os
 from unittest import TestCase
 
-from zksync_sdk import ZkSyncLibrary
+from zklink_sdk import ZkLinkLibrary
 
 
-class TestZkSyncLibrary(TestCase):
+class TestZkLinkLibrary(TestCase):
     def setUp(self):
-        self.library = ZkSyncLibrary()
+        self.library = ZkLinkLibrary()
 
     def test_public_key_hash_from_seed(self):
         seed = b"1" * 32

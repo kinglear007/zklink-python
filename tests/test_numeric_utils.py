@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from zksync_sdk.serializers import \
+from zklink_sdk.serializers import \
     num_to_bits, bits_into_bytes_in_be_order, reverse_bits, \
     closest_greater_or_eq_packable_amount, closest_greater_or_eq_packable_fee, closest_packable_transaction_fee
 

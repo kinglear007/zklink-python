@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from zksync_sdk.zksync_provider import FeeTxType
-from zksync_sdk.wallet import Wallet, DEFAULT_VALID_FROM, DEFAULT_VALID_UNTIL, AmountsMissing
-from zksync_sdk.types import (ChangePubKey, ChangePubKeyCREATE2, ChangePubKeyEcdsa,
+from zklink_sdk.zklink_provider import FeeTxType
+from zklink_sdk.wallet import Wallet, DEFAULT_VALID_FROM, DEFAULT_VALID_UNTIL, AmountsMissing
+from zklink_sdk.types import (ChangePubKey, ChangePubKeyCREATE2, ChangePubKeyEcdsa,
                               ChangePubKeyTypes, EncodedTx, ForcedExit, TokenLike,
                               TransactionWithOptionalSignature,
                               Transfer, TxEthSignature,

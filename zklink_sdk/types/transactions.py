@@ -6,14 +6,14 @@ from enum import Enum, IntEnum
 from typing import List, Optional, Union, Tuple
 
 from pydantic import BaseModel
-from zksync_sdk.lib import ZkSyncLibrary
-from zksync_sdk.serializers import (int_to_bytes, packed_amount_checked, packed_fee_checked,
+from zklink_sdk.lib import ZkLinkLibrary
+from zklink_sdk.serializers import (int_to_bytes, packed_amount_checked, packed_fee_checked,
                                     serialize_account_id,
                                     serialize_address, serialize_content_hash,
                                     serialize_nonce, serialize_timestamp,
                                     serialize_token_id, serialize_ratio_part)
-from zksync_sdk.types.signatures import TxEthSignature, TxSignature
-from zksync_sdk.types.auth_types import ChangePubKeyCREATE2, ChangePubKeyEcdsa
+from zklink_sdk.types.signatures import TxEthSignature, TxSignature
+from zklink_sdk.types.auth_types import ChangePubKeyCREATE2, ChangePubKeyEcdsa
 
 DEFAULT_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"
 
@@ -570,7 +570,7 @@ class Swap(EncodedTx):
             serialize_account_id(self.submitter_id),
             serialize_address(self.submitter_address),
             serialize_nonce(self.nonce),
-            ZkSyncLibrary().hash_orders(order_bytes),
+            ZkLinkLibrary().hash_orders(order_bytes),
             serialize_token_id(self.fee_token.id),
             packed_fee_checked(self.fee),
             packed_amount_checked(self.amounts[0]),
@@ -699,7 +699,7 @@ class WithdrawNFT(EncodedTx):
 
 
 class EncodedTxValidator:
-    def __init__(self, library: ZkSyncLibrary):
+    def __init__(self, library: ZkLinkLibrary):
         self.library = library
 
     def is_valid_signature(self, tx):

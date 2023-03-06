@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "ZkSync",
-  "sourceName": "cache/solpp-generated-contracts/ZkSync.sol",
+  "contractName": "ZkLink",
+  "sourceName": "cache/solpp-generated-contracts/ZkLink.sol",
   "abi": [
     {
       "anonymous": false,
@@ -73,7 +73,7 @@
         {
           "indexed": true,
           "internalType": "uint32",
-          "name": "zkSyncBlockId",
+          "name": "zkLinkBlockId",
           "type": "uint32"
         },
         {
@@ -141,7 +141,7 @@
         {
           "indexed": true,
           "internalType": "uint32",
-          "name": "zkSyncBlockId",
+          "name": "zkLinkBlockId",
           "type": "uint32"
         },
         {
@@ -386,7 +386,7 @@
                   "type": "uint32"
                 }
               ],
-              "internalType": "struct ZkSync.OnchainOperationData[]",
+              "internalType": "struct ZkLink.OnchainOperationData[]",
               "name": "onchainOperations",
               "type": "tuple[]"
             },
@@ -401,7 +401,7 @@
               "type": "uint32"
             }
           ],
-          "internalType": "struct ZkSync.CommitBlockInfo[]",
+          "internalType": "struct ZkLink.CommitBlockInfo[]",
           "name": "_newBlocksData",
           "type": "tuple[]"
         }
@@ -425,7 +425,7 @@
         },
         {
           "internalType": "address",
-          "name": "_zkSyncAddress",
+          "name": "_zkLinkAddress",
           "type": "address"
         }
       ],
@@ -438,7 +438,7 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_zkSyncAddress",
+          "name": "_zkLinkAddress",
           "type": "address"
         }
       ],
@@ -494,7 +494,7 @@
               "type": "bytes[]"
             }
           ],
-          "internalType": "struct ZkSync.ExecuteBlockInfo[]",
+          "internalType": "struct ZkLink.ExecuteBlockInfo[]",
           "name": "_blocksData",
           "type": "tuple[]"
         }
@@ -827,7 +827,7 @@
               "type": "uint256[16]"
             }
           ],
-          "internalType": "struct ZkSync.ProofInput",
+          "internalType": "struct ZkLink.ProofInput",
           "name": "_proof",
           "type": "tuple"
         }

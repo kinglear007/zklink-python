@@ -3,24 +3,24 @@ from fractions import Fraction
 
 from web3 import Account
 
-from zksync_sdk import ZkSyncLibrary, EthereumSignerWeb3
-from zksync_sdk.serializers import closest_packable_amount, closest_packable_transaction_fee
-from zksync_sdk.types import ChainId, ForcedExit, Token, Transfer, Withdraw, MintNFT, WithdrawNFT, Order, Swap, Tokens, \
+from zklink_sdk import ZkLinkLibrary, EthereumSignerWeb3
+from zklink_sdk.serializers import closest_packable_amount, closest_packable_transaction_fee
+from zklink_sdk.types import ChainId, ForcedExit, Token, Transfer, Withdraw, MintNFT, WithdrawNFT, Order, Swap, Tokens, \
     EncodedTxValidator
-from zksync_sdk.zksync_signer import ZkSyncSigner
+from zklink_sdk.zklink_signer import ZkLinkSigner
 
 PRIVATE_KEY = "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
 
 import json
 
 
-class ZkSyncSignerTest(TestCase):
+class ZkLinkSignerTest(TestCase):
     def setUp(self):
-        self.library = ZkSyncLibrary()
+        self.library = ZkLinkLibrary()
 
     def test_derive_pub_key(self):
         account = Account.from_key(PRIVATE_KEY)
-        signer = ZkSyncSigner.from_account(account, self.library, ChainId.MAINNET)
+        signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
         assert signer.public_key.hex() == "40771354dc314593e071eaf4d0f42ccb1fad6c7006c57464feeb7ab5872b7490"
 
     def test_transfer_bytes(self):
@@ -90,9 +90,9 @@ class ZkSyncSignerTest(TestCase):
         self.assertEqual(order.valid_from, from_json_order.valid_from)
         self.assertEqual(order.valid_until, from_json_order.valid_until)
 
-    def test_order_zksync_signature_checking(self):
+    def test_order_zklink_signature_checking(self):
         account = Account.from_key(PRIVATE_KEY)
-        signer = ZkSyncSigner.from_account(account, self.library, ChainId.MAINNET)
+        signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
 
         token1 = Token(id=1, symbol='', address='', decimals=0)  # only id matters
         token2 = Token(id=2, symbol='', address='', decimals=0)  # only id matters
@@ -114,7 +114,7 @@ class ZkSyncSignerTest(TestCase):
 
     def test_is_valid_order_deserialized(self):
         account = Account.from_key(PRIVATE_KEY)
-        zksync_signer = ZkSyncSigner.from_account(account, self.library, ChainId.MAINNET)
+        zklink_signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
         ethereum_signer = EthereumSignerWeb3(account=account)
 
         token1 = Token(id=1, symbol='', address='', decimals=0)  # only id matters
@@ -125,13 +125,13 @@ class ZkSyncSignerTest(TestCase):
                       ratio=Fraction(1, 4), amount=1000000,
                       recipient='0x823b6a996cea19e0c41e250b20e2e804ea72ccdf',
                       valid_from=0, valid_until=4294967295)
-        order.signature = zksync_signer.sign_tx(order)
+        order.signature = zklink_signer.sign_tx(order)
         order.eth_signature = ethereum_signer.sign_tx(order)
-        zksync_validator = EncodedTxValidator(self.library)
+        zklink_validator = EncodedTxValidator(self.library)
         serialized_order = json.dumps(order.dict(), indent=4)
 
         deserialized_order = Order.from_json(json.loads(serialized_order), tokens_pool)
-        ret = zksync_validator.is_valid_signature(deserialized_order)
+        ret = zklink_validator.is_valid_signature(deserialized_order)
         self.assertTrue(ret)
         ret = deserialized_order.is_valid_eth_signature(ethereum_signer.address())
         self.assertTrue(ret)
@@ -182,7 +182,7 @@ class ZkSyncSignerTest(TestCase):
 
     def test_signature(self):
         account = Account.from_key(PRIVATE_KEY)
-        signer = ZkSyncSigner.from_account(account, self.library, ChainId.MAINNET)
+        signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
         tr = Transfer(from_address="0xedE35562d3555e61120a151B3c8e8e91d83a378a",
                       to_address="0x19aa2ed8712072e918632259780e587698ef58df",
                       token=Token.eth(),

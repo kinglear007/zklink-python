@@ -3,19 +3,19 @@ from decimal import Decimal
 from typing import List, Optional, Union
 from web3 import Web3
 
-from zksync_sdk.types import (AccountState, ContractAddress, EncodedTx, EthOpInfo, Fee, Token,
+from zklink_sdk.types import (AccountState, ContractAddress, EncodedTx, EthOpInfo, Fee, Token,
                               TokenLike, Tokens, TransactionDetails, TransactionWithSignature,
                               TransactionWithOptionalSignature,
                               TxEthSignature, Toggle2FA, )
-from zksync_sdk.zksync_provider.error import AccountDoesNotExist
-from zksync_sdk.zksync_provider.interface import ZkSyncProviderInterface
-from zksync_sdk.zksync_provider.types import FeeTxType
-from zksync_sdk.zksync_provider.transaction import Transaction
+from zklink_sdk.zklink_provider.error import AccountDoesNotExist
+from zklink_sdk.zklink_provider.interface import ZkLinkProviderInterface
+from zklink_sdk.zklink_provider.types import FeeTxType
+from zklink_sdk.zklink_provider.transaction import Transaction
 
-__all__ = ['ZkSyncProviderV01']
+__all__ = ['ZkLinkProviderV01']
 
 
-class ZkSyncProviderV01(ZkSyncProviderInterface):
+class ZkLinkProviderV01(ZkLinkProviderInterface):
     async def submit_tx(self, tx: EncodedTx, signature: Union[Optional[TxEthSignature], List[Optional[TxEthSignature]]],
                         fast_processing: bool = False) -> Transaction:
         if isinstance(signature, List):

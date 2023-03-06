@@ -1,7 +1,7 @@
 from eth_account.messages import encode_defunct
 from eth_account.signers.base import BaseAccount
-from zksync_sdk.ethereum_signer.interface import EthereumSignerInterface
-from zksync_sdk.types import EncodedTx, SignatureType, TxEthSignature
+from zklink_sdk.ethereum_signer.interface import EthereumSignerInterface
+from zklink_sdk.types import EncodedTx, SignatureType, TxEthSignature
 
 __all__ = ['EthereumSignerWeb3']
 

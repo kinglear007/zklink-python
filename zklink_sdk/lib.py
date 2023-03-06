@@ -47,11 +47,11 @@ class ZksOrders(Structure):
     ]
 
 
-class ZkSyncLibrary:
+class ZkLinkLibrary:
 
     def __init__(self, library_path: Optional[str] = None):
         if library_path is None:
-            library_path = os.environ["ZK_SYNC_LIBRARY_PATH"]
+            library_path = os.environ["ZK_LINK_LIBRARY_PATH"]
         self.lib = cdll.LoadLibrary(library_path)
 
     def private_key_from_seed(self, seed: bytes):

@@ -1,18 +1,18 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
 from typing import List, Optional, Union
-from zksync_sdk.transport import JsonRPCTransport
-from zksync_sdk.types import (AccountState, ContractAddress, EncodedTx, EthOpInfo, Fee, Token,
+from zklink_sdk.transport import JsonRPCTransport
+from zklink_sdk.types import (AccountState, ContractAddress, EncodedTx, EthOpInfo, Fee, Token,
                               TokenLike, Tokens, TransactionDetails, TransactionWithSignature,
                               TransactionWithOptionalSignature,
                               TxEthSignature, Toggle2FA, )
-from zksync_sdk.zksync_provider.types import FeeTxType
-from zksync_sdk.zksync_provider.transaction import Transaction
+from zklink_sdk.zklink_provider.types import FeeTxType
+from zklink_sdk.zklink_provider.transaction import Transaction
 
-__all__ = ['ZkSyncProviderInterface']
+__all__ = ['ZkLinkProviderInterface']
 
 
-class ZkSyncProviderInterface(ABC):
+class ZkLinkProviderInterface(ABC):
     def __init__(self, provider: JsonRPCTransport):
         self.provider = provider
 

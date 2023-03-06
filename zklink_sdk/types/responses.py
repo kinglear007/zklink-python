@@ -1,7 +1,7 @@
 from typing import Any, Dict, Optional
 from enum import Enum
 from decimal import Decimal
-from zksync_sdk.types.transactions import Token
+from zklink_sdk.types.transactions import Token
 
 from pydantic import BaseModel
 

@@ -1,19 +1,19 @@
 from decimal import Decimal
 from fractions import Fraction
 from unittest import IsolatedAsyncioTestCase
-from zksync_sdk.zksync_provider.types import FeeTxType
-from zksync_sdk.types.responses import Fee
+from zklink_sdk.zklink_provider.types import FeeTxType
+from zklink_sdk.types.responses import Fee
 import asyncio
 from web3 import Account, HTTPProvider, Web3
 
-from zksync_sdk import (EthereumProvider, EthereumSignerWeb3, HttpJsonRPCTransport, Wallet, ZkSync,
-                        ZkSyncLibrary, ZkSyncProviderV01, ZkSyncSigner, )
-from zksync_sdk.zksync_provider.batch_builder import BatchBuilder
-from zksync_sdk.network import rinkeby
-from zksync_sdk.types import ChangePubKeyEcdsa, Token, TransactionWithSignature, \
+from zklink_sdk import (EthereumProvider, EthereumSignerWeb3, HttpJsonRPCTransport, Wallet, ZkLink,
+                        ZkLinkLibrary, ZkLinkProviderV01, ZkLinkSigner, )
+from zklink_sdk.zklink_provider.batch_builder import BatchBuilder
+from zklink_sdk.network import rinkeby
+from zklink_sdk.types import ChangePubKeyEcdsa, Token, TransactionWithSignature, \
     TransactionWithOptionalSignature, RatioType, Transfer, AccountTypes
-from zksync_sdk.zksync_provider.transaction import TransactionStatus
-from zksync_sdk.wallet import DEFAULT_VALID_FROM, DEFAULT_VALID_UNTIL
+from zklink_sdk.zklink_provider.transaction import TransactionStatus
+from zklink_sdk.wallet import DEFAULT_VALID_FROM, DEFAULT_VALID_UNTIL
 
 
 class TestWallet(IsolatedAsyncioTestCase):
@@ -35,17 +35,17 @@ class TestWallet(IsolatedAsyncioTestCase):
 
         w3 = Web3(HTTPProvider(
             endpoint_uri="https://rinkeby.infura.io/v3/bcf42e619a704151a1b0d95a35cb2e62"))
-        provider = ZkSyncProviderV01(provider=HttpJsonRPCTransport(network=rinkeby))
+        provider = ZkLinkProviderV01(provider=HttpJsonRPCTransport(network=rinkeby))
         address = await provider.get_contract_address()
-        zksync = ZkSync(account=account, web3=w3, zksync_contract_address=address.main_contract)
-        ethereum_provider = EthereumProvider(w3, zksync)
-        signer = ZkSyncSigner.from_account(account, self.library, rinkeby.chain_id)
+        zklink = ZkLink(account=account, web3=w3, zklink_contract_address=address.main_contract)
+        ethereum_provider = EthereumProvider(w3, zklink)
+        signer = ZkLinkSigner.from_account(account, self.library, rinkeby.chain_id)
 
         return Wallet(ethereum_provider=ethereum_provider, zk_signer=signer,
                       eth_signer=ethereum_signer, provider=provider)
 
     async def asyncSetUp(self):
-        self.library = ZkSyncLibrary()
+        self.library = ZkLinkLibrary()
         self.wallet = await self.get_wallet(self.private_key)
         self.wallets = [await self.get_wallet(key) for key in self.private_keys]
 
@@ -272,7 +272,7 @@ class TestWallet(IsolatedAsyncioTestCase):
         INFO: During the testing there are cases when this wallet does not own any NFT tokens by default,
               use mint_nft to VERIFIED state took too long and failed
               There are 2 solutions for the whole situation:
-              1. Prepare the docker with local ZkSync & Eth servers & achieve VERIFIED state fast =>
+              1. Prepare the docker with local ZkLink & Eth servers & achieve VERIFIED state fast =>
                  Any token or data can be transfered/deposited inside the test and do manipulations
               2. If this wallet does not have NFT tokens do nothing
                  Currently this choise is made
@@ -310,7 +310,7 @@ class TestWallet(IsolatedAsyncioTestCase):
         INFO: During the testing there are cases when this wallet does not own any NFT tokens by default,
               use mint_nft to VERIFIED state took too long and failed
               There are 2 solutions for the whole situation:
-              1. Prepare the docker with local ZkSync & Eth servers & achieve VERIFIED state fast =>
+              1. Prepare the docker with local ZkLink & Eth servers & achieve VERIFIED state fast =>
                  Any token or data can be transfered/deposited inside the test and do manipulations
               2. If this wallet does not have NFT tokens do nothing
                  Currently this choise is made
@@ -374,15 +374,15 @@ class TestEthereumProvider(IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
         self.account = Account.from_key(self.private_key)
-        self.library = ZkSyncLibrary()
+        self.library = ZkLinkLibrary()
 
         w3 = Web3(HTTPProvider(
             endpoint_uri="https://rinkeby.infura.io/v3/bcf42e619a704151a1b0d95a35cb2e62"))
-        provider = ZkSyncProviderV01(provider=HttpJsonRPCTransport(network=rinkeby))
+        provider = ZkLinkProviderV01(provider=HttpJsonRPCTransport(network=rinkeby))
         address = await provider.get_contract_address()
-        self.zksync = ZkSync(account=self.account, web3=w3,
-                             zksync_contract_address=address.main_contract)
-        self.ethereum_provider = EthereumProvider(w3, self.zksync)
+        self.zklink = ZkLink(account=self.account, web3=w3,
+                             zklink_contract_address=address.main_contract)
+        self.ethereum_provider = EthereumProvider(w3, self.zklink)
 
     async def test_approve_deposit(self):
         token = Token(
@@ -425,9 +425,9 @@ class TestEthereumProvider(IsolatedAsyncioTestCase):
         assert await self.ethereum_provider.is_deposit_approved(token, 1)
 
 
-class TestZkSyncProvider(IsolatedAsyncioTestCase):
+class TestZkLinkProvider(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
-        self.provider = ZkSyncProviderV01(provider=HttpJsonRPCTransport(network=rinkeby))
+        self.provider = ZkLinkProviderV01(provider=HttpJsonRPCTransport(network=rinkeby))
 
     async def test_get_token_price(self):
         tokens = await self.provider.get_tokens()

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from zksync_sdk.types import EncodedTx, TxEthSignature
+from zklink_sdk.types import EncodedTx, TxEthSignature
 
 __all__ = ['EthereumSignerInterface']
 
