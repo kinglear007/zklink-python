@@ -25,13 +25,16 @@ class ZkLinkSignerTest(TestCase):
         assert signer.public_key.hex() == "b720c6110e673b55b5725dd0ff5778a8668ef4c7324718f78fa11def63081e85"
 
     def test_transfer_bytes(self):
-        tr = Transfer(from_address="0xedE35562d3555e61120a151B3c8e8e91d83a378a",
-                      to_address="0x19aa2ed8712072e918632259780e587698ef58df",
-                      token=Token.eth(),
-                      amount=1000000000000, fee=1000000, nonce=12, valid_from=0,
-                      valid_until=4294967295, account_id=44)
-        res = "fa010000002cede35562d3555e61120a151b3c8e8e91d83a378a19aa2ed8712072e918632259780e587698ef58df000000004a817c80027d030000000c000000000000000000000000ffffffff"
-        assert tr.encoded_message().hex() == res
+        tr = Transfer(from_sub_account_id=1, to_sub_account_id=1,
+                      to_address="0xdddd547fA95AdE4EF0C8B517dA7889A5F110eA38",
+                      token=Token(id=42, address='', symbol='', decimals=18),
+                      amount=1000000000000000000, fee=238000000000000,
+                      nonce=3, timestamp=1670830922, account_id=15)
+
+        res = "040000000f01dddd547fa95ade4ef0c8b517da7889a5f110ea3801002a4a817c80081dcc000000036396db4a"
+        assert tr.encoded_message() == res
+        hash = "sync-tx:f73678d4fa488a846dd89f059c6f2f29b3e79fe27bb162c878e1e0bb39236c17"
+        assert tr.tx_hash() == hash
 
     def test_withdraw_bytes(self):
         tr = Withdraw(from_address="0xedE35562d3555e61120a151B3c8e8e91d83a378a",

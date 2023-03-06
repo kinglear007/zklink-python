@@ -1,4 +1,5 @@
 import abc
+import hashlib
 from dataclasses import dataclass
 from decimal import Decimal
 from fractions import Fraction
@@ -23,13 +24,19 @@ TRANSACTION_VERSION = 0x01
 
 
 class EncodedTxType(IntEnum):
-    CHANGE_PUB_KEY = 7
-    TRANSFER = 5
+    # CHANGE_PUB_KEY = 7
+    # TRANSFER = 5
+    # WITHDRAW = 3
+    # FORCED_EXIT = 8
+    # SWAP = 11
+    # MINT_NFT = 9
+    # WITHDRAW_NFT = 10
+
+    CHANGE_PUB_KEY = 6
+    TRANSFER = 4
     WITHDRAW = 3
-    FORCED_EXIT = 8
-    SWAP = 11
-    MINT_NFT = 9
-    WITHDRAW_NFT = 10
+    FORCED_EXIT = 7
+    ORDER_MATCHING = 8
 
 
 class RatioType(Enum):
@@ -82,7 +89,7 @@ class Token(BaseModel):
 def token_ratio_to_wei_ratio(token_ratio: Fraction, token_sell: Token, token_buy: Token) -> Fraction:
     num = token_sell.from_decimal(Decimal(token_ratio.numerator))
     den = token_buy.from_decimal(Decimal(token_ratio.denominator))
-    return Fraction(num, den, _normalize = False)
+    return Fraction(num, den, _normalize=False)
 
 
 class Tokens(BaseModel):
@@ -140,6 +147,10 @@ class EncodedTx(abc.ABC):
 
     @abc.abstractmethod
     def batch_message_part(self) -> str:
+        pass
+
+    @abc.abstractmethod
+    def tx_hash(self) -> str:
         pass
 
 
@@ -221,17 +232,82 @@ class ChangePubKey(EncodedTx):
         return EncodedTxType.CHANGE_PUB_KEY
 
 
+# @dataclass
+# class Transfer(EncodedTx):
+#     account_id: int
+#     from_address: str
+#     to_address: str
+#     token: Token
+#     amount: int
+#     fee: int
+#     nonce: int
+#     valid_from: int
+#     valid_until: int
+#     signature: Optional[TxSignature] = None
+#
+#     def tx_type(self) -> int:
+#         return EncodedTxType.TRANSFER
+#
+#     def human_readable_message(self) -> str:
+#         msg = ""
+#
+#         if self.amount != 0:
+#             msg += f"Transfer {self.token.decimal_str_amount(self.amount)} {self.token.symbol} to: {self.to_address.lower()}\n"
+#         if self.fee != 0:
+#             msg += f"Fee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\n"
+#
+#         return msg + f"Nonce: {self.nonce}"
+#
+#     def batch_message_part(self) -> str:
+#         msg = ""
+#         if self.amount != 0:
+#             msg += f"Transfer {self.token.decimal_str_amount(self.amount)} {self.token.symbol} to: {self.to_address.lower()}\n"
+#         if self.fee != 0:
+#             msg += f"Fee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\n"
+#         return msg
+#
+#     def encoded_message(self) -> bytes:
+#         return b"".join([
+#             int_to_bytes(0xff - self.tx_type(), 1),
+#             int_to_bytes(TRANSACTION_VERSION, 1),
+#             serialize_account_id(self.account_id),
+#             serialize_address(self.from_address),
+#             serialize_address(self.to_address),
+#             serialize_token_id(self.token.id),
+#             packed_amount_checked(self.amount),
+#             packed_fee_checked(self.fee),
+#             serialize_nonce(self.nonce),
+#             serialize_timestamp(self.valid_from),
+#             serialize_timestamp(self.valid_until)
+#         ])
+#
+#     def dict(self):
+#         return {
+#             "type": "Transfer",
+#             "accountId": self.account_id,
+#             "from": self.from_address,
+#             "to": self.to_address,
+#             "token": self.token.id,
+#             "fee": str(self.fee),
+#             "nonce": self.nonce,
+#             "signature": self.signature.dict(),
+#             "amount": str(self.amount),
+#             "validFrom": self.valid_from,
+#             "validUntil": self.valid_until,
+#         }
+
+
 @dataclass
 class Transfer(EncodedTx):
     account_id: int
-    from_address: str
+    from_sub_account_id: int
     to_address: str
+    to_sub_account_id: int
     token: Token
     amount: int
     fee: int
     nonce: int
-    valid_from: int
-    valid_until: int
+    timestamp: int
     signature: Optional[TxSignature] = None
 
     def tx_type(self) -> int:
@@ -257,33 +333,35 @@ class Transfer(EncodedTx):
 
     def encoded_message(self) -> bytes:
         return b"".join([
-            int_to_bytes(0xff - self.tx_type(), 1),
-            int_to_bytes(TRANSACTION_VERSION, 1),
+            int_to_bytes(self.tx_type(), 1),
             serialize_account_id(self.account_id),
-            serialize_address(self.from_address),
+            int_to_bytes(self.from_sub_account_id, 1),
             serialize_address(self.to_address),
+            int_to_bytes(self.to_sub_account_id, 1),
             serialize_token_id(self.token.id),
             packed_amount_checked(self.amount),
             packed_fee_checked(self.fee),
             serialize_nonce(self.nonce),
-            serialize_timestamp(self.valid_from),
-            serialize_timestamp(self.valid_until)
+            serialize_timestamp(self.timestamp)
         ])
 
     def dict(self):
         return {
             "type": "Transfer",
             "accountId": self.account_id,
-            "from": self.from_address,
+            "fromSubAccountId": self.from_sub_account_id,
             "to": self.to_address,
+            "toSubAccountId": self.to_sub_account_id,
             "token": self.token.id,
             "fee": str(self.fee),
             "nonce": self.nonce,
             "signature": self.signature.dict(),
             "amount": str(self.amount),
-            "validFrom": self.valid_from,
-            "validUntil": self.valid_until,
+            "ts": self.timestamp
         }
+
+    def tx_hash(self) -> str:
+        return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
 
 
 @dataclass
