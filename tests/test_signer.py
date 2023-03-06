@@ -20,7 +20,8 @@ class ZkLinkSignerTest(TestCase):
 
     def test_derive_pub_key(self):
         account = Account.from_key(PRIVATE_KEY)
-        signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
+        # signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
+        signer = ZkLinkSigner.from_account(account, self.library)
         assert signer.public_key.hex() == "40771354dc314593e071eaf4d0f42ccb1fad6c7006c57464feeb7ab5872b7490"
 
     def test_transfer_bytes(self):
@@ -92,7 +93,8 @@ class ZkLinkSignerTest(TestCase):
 
     def test_order_zklink_signature_checking(self):
         account = Account.from_key(PRIVATE_KEY)
-        signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
+        # signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
+        signer = ZkLinkSigner.from_account(account, self.library)
 
         token1 = Token(id=1, symbol='', address='', decimals=0)  # only id matters
         token2 = Token(id=2, symbol='', address='', decimals=0)  # only id matters
@@ -114,7 +116,8 @@ class ZkLinkSignerTest(TestCase):
 
     def test_is_valid_order_deserialized(self):
         account = Account.from_key(PRIVATE_KEY)
-        zklink_signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
+        # zklink_signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
+        zklink_signer = ZkLinkSigner.from_account(account, self.library)
         ethereum_signer = EthereumSignerWeb3(account=account)
 
         token1 = Token(id=1, symbol='', address='', decimals=0)  # only id matters
@@ -182,7 +185,8 @@ class ZkLinkSignerTest(TestCase):
 
     def test_signature(self):
         account = Account.from_key(PRIVATE_KEY)
-        signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
+        # signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
+        signer = ZkLinkSigner.from_account(account, self.library)
         tr = Transfer(from_address="0xedE35562d3555e61120a151B3c8e8e91d83a378a",
                       to_address="0x19aa2ed8712072e918632259780e587698ef58df",
                       token=Token.eth(),

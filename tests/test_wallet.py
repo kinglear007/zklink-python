@@ -9,7 +9,7 @@ from web3 import Account, HTTPProvider, Web3
 from zklink_sdk import (EthereumProvider, EthereumSignerWeb3, HttpJsonRPCTransport, Wallet, ZkLink,
                         ZkLinkLibrary, ZkLinkProviderV01, ZkLinkSigner, )
 from zklink_sdk.zklink_provider.batch_builder import BatchBuilder
-from zklink_sdk.network import rinkeby
+# from zklink_sdk.network import rinkeby
 from zklink_sdk.types import ChangePubKeyEcdsa, Token, TransactionWithSignature, \
     TransactionWithOptionalSignature, RatioType, Transfer, AccountTypes
 from zklink_sdk.zklink_provider.transaction import TransactionStatus
@@ -39,7 +39,8 @@ class TestWallet(IsolatedAsyncioTestCase):
         address = await provider.get_contract_address()
         zklink = ZkLink(account=account, web3=w3, zklink_contract_address=address.main_contract)
         ethereum_provider = EthereumProvider(w3, zklink)
-        signer = ZkLinkSigner.from_account(account, self.library, rinkeby.chain_id)
+        # signer = ZkLinkSigner.from_account(account, self.library, rinkeby.chain_id)
+        signer = ZkLinkSigner.from_account(account, self.library)
 
         return Wallet(ethereum_provider=ethereum_provider, zk_signer=signer,
                       eth_signer=ethereum_signer, provider=provider)

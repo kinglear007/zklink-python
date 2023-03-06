@@ -5,10 +5,17 @@ from zklink_sdk import ZkLinkLibrary
 from zklink_sdk.types import ChainId, EncodedTx, TxSignature
 
 
-def derive_private_key(library: ZkLinkLibrary, message: str, account: BaseAccount,
-                       chain_id: ChainId):
-    if chain_id != ChainId.MAINNET:
-        message = f"{message}\nChain ID: {chain_id}."
+# def derive_private_key(library: ZkLinkLibrary, message: str, account: BaseAccount,
+#                        chain_id: ChainId):
+#     if chain_id != ChainId.MAINNET:
+#         message = f"{message}\nChain ID: {chain_id}."
+#     signable_message = encode_defunct(message.encode())
+#     signature = account.sign_message(signable_message)
+#     private_key = library.private_key_from_seed(signature.signature)
+#     return private_key
+
+
+def derive_private_key(library: ZkLinkLibrary, message: str, account: BaseAccount):
     signable_message = encode_defunct(message.encode())
     signature = account.sign_message(signable_message)
     private_key = library.private_key_from_seed(signature.signature)
@@ -16,16 +23,24 @@ def derive_private_key(library: ZkLinkLibrary, message: str, account: BaseAccoun
 
 
 class ZkLinkSigner:
-    MESSAGE = "Access zkLink account.\n\nOnly sign this message for a trusted client!"
+    MESSAGE = "Sign this message to create a private key to interact with zkLink's layer 2 services.\nNOTE: This application is powered by zkLink's multi-chain network.\n\nOnly sign this message for a trusted client!"
 
     def __init__(self, library: ZkLinkLibrary, private_key: bytes):
         self.library = library
         self.private_key = private_key
         self.public_key = self.library.get_public_key(self.private_key)
 
+    # @classmethod
+    # def from_account(cls, account: BaseAccount, library: ZkLinkLibrary, chain_id: ChainId):
+    #     private_key = derive_private_key(library, cls.MESSAGE, account, chain_id)
+    #     return cls(
+    #         library=library,
+    #         private_key=private_key,
+    #     )
+
     @classmethod
-    def from_account(cls, account: BaseAccount, library: ZkLinkLibrary, chain_id: ChainId):
-        private_key = derive_private_key(library, cls.MESSAGE, account, chain_id)
+    def from_account(cls, account: BaseAccount, library: ZkLinkLibrary):
+        private_key = derive_private_key(library, cls.MESSAGE, account)
         return cls(
             library=library,
             private_key=private_key,
