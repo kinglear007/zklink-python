@@ -9,7 +9,7 @@ from zklink_sdk.types import ChainId, ForcedExit, Token, Transfer, Withdraw, Min
     EncodedTxValidator
 from zklink_sdk.zklink_signer import ZkLinkSigner
 
-PRIVATE_KEY = "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+PRIVATE_KEY = "336b38ea188a4da28a9a3232a21359a51f6b3c5fdd844c122dd6d76d6605a4ec"
 
 import json
 
@@ -22,7 +22,7 @@ class ZkLinkSignerTest(TestCase):
         account = Account.from_key(PRIVATE_KEY)
         # signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
         signer = ZkLinkSigner.from_account(account, self.library)
-        assert signer.public_key.hex() == "40771354dc314593e071eaf4d0f42ccb1fad6c7006c57464feeb7ab5872b7490"
+        assert signer.public_key.hex() == "b720c6110e673b55b5725dd0ff5778a8668ef4c7324718f78fa11def63081e85"
 
     def test_transfer_bytes(self):
         tr = Transfer(from_address="0xedE35562d3555e61120a151B3c8e8e91d83a378a",
