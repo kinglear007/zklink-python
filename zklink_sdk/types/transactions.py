@@ -412,6 +412,7 @@ class Transfer(EncodedTx):
     #             serialize_timestamp(self.valid_until)
     #         ])
 
+
 @dataclass
 class Withdraw(EncodedTx):
     to_chain_id: int
@@ -487,15 +488,70 @@ class Withdraw(EncodedTx):
         return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
 
 
+# @dataclass
+# class ForcedExit(EncodedTx):
+#     initiator_account_id: int
+#     target: str
+#     token: Token
+#     fee: int
+#     nonce: int
+#     valid_from: int
+#     valid_until: int
+#     signature: Optional[TxSignature] = None
+#
+#     def tx_type(self) -> int:
+#         return EncodedTxType.FORCED_EXIT
+#
+#     def encoded_message(self) -> bytes:
+#         return b"".join([
+#             int_to_bytes(0xff - self.tx_type(), 1),
+#             int_to_bytes(TRANSACTION_VERSION, 1),
+#             serialize_account_id(self.initiator_account_id),
+#             serialize_address(self.target),
+#             serialize_token_id(self.token.id),
+#             packed_fee_checked(self.fee),
+#             serialize_nonce(self.nonce),
+#             serialize_timestamp(self.valid_from),
+#             serialize_timestamp(self.valid_until)
+#         ])
+#
+#     def human_readable_message(self) -> str:
+#         message = f"ForcedExit {self.token.symbol} to: {self.target.lower()}\nFee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\nNonce: {self.nonce}"
+#         return message
+#
+#     def batch_message_part(self) -> str:
+#         message = f"ForcedExit {self.token.symbol} to: {self.target.lower()}\n" \
+#                   f"Fee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\n"
+#         return message
+#
+#     def dict(self):
+#         return {
+#             "type": "ForcedExit",
+#             "initiatorAccountId": self.initiator_account_id,
+#             "target": self.target,
+#             "token": self.token.id,
+#             "fee": str(self.fee),
+#             "nonce": self.nonce,
+#             "signature": self.signature.dict(),
+#             "validFrom": self.valid_from,
+#             "validUntil": self.valid_until,
+#         }
+
+
 @dataclass
 class ForcedExit(EncodedTx):
+    to_chain_id: int
     initiator_account_id: int
+    initiator_sub_account_id: int
     target: str
-    token: Token
+    target_sub_account_id: int
+    l2_source_token: Token
+    l1_target_token: Token
+    fee_token: Token
     fee: int
     nonce: int
-    valid_from: int
-    valid_until: int
+    timestamp: int
+
     signature: Optional[TxSignature] = None
 
     def tx_type(self) -> int:
@@ -503,38 +559,47 @@ class ForcedExit(EncodedTx):
 
     def encoded_message(self) -> bytes:
         return b"".join([
-            int_to_bytes(0xff - self.tx_type(), 1),
-            int_to_bytes(TRANSACTION_VERSION, 1),
+            int_to_bytes(self.tx_type(), 1),
+            serialize_chain_id(self.to_chain_id),
             serialize_account_id(self.initiator_account_id),
+            serialize_sub_account_id(self.initiator_sub_account_id),
             serialize_address(self.target),
-            serialize_token_id(self.token.id),
+            serialize_sub_account_id(self.target_sub_account_id),
+            serialize_token_id(self.l2_source_token.id),
+            serialize_token_id(self.l1_target_token.id),
+            serialize_token_id(self.fee_token.id),
             packed_fee_checked(self.fee),
             serialize_nonce(self.nonce),
-            serialize_timestamp(self.valid_from),
-            serialize_timestamp(self.valid_until)
+            serialize_timestamp(self.timestamp)
         ])
 
     def human_readable_message(self) -> str:
-        message = f"ForcedExit {self.token.symbol} to: {self.target.lower()}\nFee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\nNonce: {self.nonce}"
+        message = f"ForcedExit {self.l2_source_token.symbol} to: {self.target.lower()}\nFee: {self.fee_token.decimal_str_amount(self.fee)} {self.fee_token.symbol}\nNonce: {self.nonce}"
         return message
 
     def batch_message_part(self) -> str:
-        message = f"ForcedExit {self.token.symbol} to: {self.target.lower()}\n" \
-                  f"Fee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\n"
+        message = f"ForcedExit {self.l2_source_token.symbol} to: {self.target.lower()}\n" \
+                  f"Fee: {self.fee_token.decimal_str_amount(self.fee)} {self.fee_token.symbol}\n"
         return message
 
     def dict(self):
         return {
             "type": "ForcedExit",
+            "toChainId": self.to_chain_id,
             "initiatorAccountId": self.initiator_account_id,
+            "initiatorSubAccountId": self.initiator_sub_account_id,
             "target": self.target,
-            "token": self.token.id,
+            "targetSubAccountId": self.target_sub_account_id,
+            "l2SourceToken": self.l2_source_token.id,
+            "l1TargetToken": self.l1_target_token.id,
+            "feeToken": self.fee_token.id,
             "fee": str(self.fee),
             "nonce": self.nonce,
-            "signature": self.signature.dict(),
-            "validFrom": self.valid_from,
-            "validUntil": self.valid_until,
+            "ts": self.timestamp
         }
+
+    def tx_hash(self) -> str:
+        return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
 
 
 @dataclass

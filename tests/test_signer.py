@@ -147,13 +147,20 @@ class ZkLinkSignerTest(TestCase):
 
     def test_forced_exit_bytes(self):
         tr = ForcedExit(
-            target="0x19aa2ed8712072e918632259780e587698ef58df",
-            token=Token.eth(),
-            fee=1000000, nonce=12, valid_from=0,
-            valid_until=4294967295, initiator_account_id=44
+            to_chain_id= 1, initiator_account_id= 1, initiator_sub_account_id= 0,
+            target="0x3498F456645270eE003441df82C718b56c0e6666", target_sub_account_id=0,
+            l2_source_token=Token(id=1, address='', symbol='', decimals=18),
+            l1_target_token=Token(id=17, address='', symbol='', decimals=18),
+            fee_token=Token(id=1, address='', symbol='', decimals=18),
+            fee=4100000000000000, nonce=85, timestamp=1649749979
         )
-        res = "f7010000002c19aa2ed8712072e918632259780e587698ef58df000000007d030000000c000000000000000000000000ffffffff"
+
+        res = "070100000001003498f456645270ee003441df82c718b56c0e666600000100110001334d0000005562552fdb"
         assert tr.encoded_message().hex() == res
+
+        hash = "sync-tx:5c0dee07e26608bdc1ce7f66a6fc6eefe58012e17ef38b2f224f23b52f1deca1"
+        assert tr.tx_hash() == hash
+
 
     # def test_mint_nft_bytes(self):
     #     tr = MintNFT(
