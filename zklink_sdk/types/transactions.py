@@ -12,7 +12,8 @@ from zklink_sdk.serializers import (int_to_bytes, packed_amount_checked, packed_
                                     serialize_account_id,
                                     serialize_address, serialize_content_hash,
                                     serialize_nonce, serialize_timestamp,
-                                    serialize_token_id, serialize_ratio_part)
+                                    serialize_token_id, serialize_ratio_part,
+                                    serialize_sub_account_id, serialize_chain_id)
 from zklink_sdk.types.signatures import TxEthSignature, TxSignature
 from zklink_sdk.types.auth_types import ChangePubKeyCREATE2, ChangePubKeyEcdsa
 
@@ -308,6 +309,7 @@ class Transfer(EncodedTx):
     fee: int
     nonce: int
     timestamp: int
+
     signature: Optional[TxSignature] = None
 
     def tx_type(self) -> int:
@@ -335,9 +337,9 @@ class Transfer(EncodedTx):
         return b"".join([
             int_to_bytes(self.tx_type(), 1),
             serialize_account_id(self.account_id),
-            int_to_bytes(self.from_sub_account_id, 1),
+            serialize_sub_account_id(self.from_sub_account_id),
             serialize_address(self.to_address),
-            int_to_bytes(self.to_sub_account_id, 1),
+            serialize_sub_account_id(self.to_sub_account_id),
             serialize_token_id(self.token.id),
             packed_amount_checked(self.amount),
             packed_fee_checked(self.fee),
@@ -363,18 +365,68 @@ class Transfer(EncodedTx):
     def tx_hash(self) -> str:
         return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
 
+    # @dataclass
+    # class Withdraw(EncodedTx):
+    #     account_id: int
+    #     from_address: str
+    #     to_address: str
+    #     amount: int
+    #     fee: int
+    #     nonce: int
+    #     valid_from: int
+    #     valid_until: int
+    #     token: Token
+    #     signature: Optional[TxSignature] = None
+    #
+    #     def tx_type(self) -> int:
+    #         return EncodedTxType.WITHDRAW
+    #
+    #     def human_readable_message(self) -> str:
+    #         msg = ""
+    #         if self.amount != 0:
+    #             msg += f"Withdraw {self.token.decimal_str_amount(self.amount)} {self.token.symbol} to: {self.to_address.lower()}\n"
+    #         if self.fee != 0:
+    #             msg += f"Fee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\n"
+    #         return msg + f"Nonce: {self.nonce}"
+    #
+    #     def batch_message_part(self) -> str:
+    #         msg = ""
+    #         if self.amount != 0:
+    #             msg += f"Withdraw {self.token.decimal_str_amount(self.amount)} {self.token.symbol} to: {self.to_address.lower()}\n"
+    #         if self.fee != 0:
+    #             msg += f"Fee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\n"
+    #         return msg
+    #
+    #     def encoded_message(self) -> bytes:
+    #         return b"".join([
+    #             int_to_bytes(0xff - self.tx_type(), 1),
+    #             int_to_bytes(TRANSACTION_VERSION, 1),
+    #             serialize_account_id(self.account_id),
+    #             serialize_address(self.from_address),
+    #             serialize_address(self.to_address),
+    #             serialize_token_id(self.token.id),
+    #             int_to_bytes(self.amount, length=16),
+    #             packed_fee_checked(self.fee),
+    #             serialize_nonce(self.nonce),
+    #             serialize_timestamp(self.valid_from),
+    #             serialize_timestamp(self.valid_until)
+    #         ])
 
 @dataclass
 class Withdraw(EncodedTx):
+    to_chain_id: int
     account_id: int
-    from_address: str
+    sub_account_id: int
     to_address: str
+    l2_source_token: Token
+    l1_target_token: Token
     amount: int
     fee: int
     nonce: int
-    valid_from: int
-    valid_until: int
-    token: Token
+    fast_withdraw: int
+    withdraw_fee_ratio: int
+    timestamp: int
+
     signature: Optional[TxSignature] = None
 
     def tx_type(self) -> int:
@@ -383,48 +435,56 @@ class Withdraw(EncodedTx):
     def human_readable_message(self) -> str:
         msg = ""
         if self.amount != 0:
-            msg += f"Withdraw {self.token.decimal_str_amount(self.amount)} {self.token.symbol} to: {self.to_address.lower()}\n"
+            msg += f"Withdraw {self.l2_source_token.decimal_str_amount(self.amount)} {self.l2_source_token.symbol} to: {self.to_address.lower()}\n"
         if self.fee != 0:
-            msg += f"Fee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\n"
+            msg += f"Fee: {self.l2_source_token.decimal_str_amount(self.fee)} {self.l2_source_token.symbol}\n"
         return msg + f"Nonce: {self.nonce}"
 
     def batch_message_part(self) -> str:
         msg = ""
         if self.amount != 0:
-            msg += f"Withdraw {self.token.decimal_str_amount(self.amount)} {self.token.symbol} to: {self.to_address.lower()}\n"
+            msg += f"Withdraw {self.l2_source_token.decimal_str_amount(self.amount)} {self.tokl2_source_tokenen.symbol} to: {self.to_address.lower()}\n"
         if self.fee != 0:
-            msg += f"Fee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\n"
+            msg += f"Fee: {self.l2_source_token.decimal_str_amount(self.fee)} {self.l2_source_token.symbol}\n"
         return msg
 
     def encoded_message(self) -> bytes:
         return b"".join([
-            int_to_bytes(0xff - self.tx_type(), 1),
-            int_to_bytes(TRANSACTION_VERSION, 1),
+            int_to_bytes(self.tx_type(), 1),
+            serialize_chain_id(self.to_chain_id),
             serialize_account_id(self.account_id),
-            serialize_address(self.from_address),
+            serialize_sub_account_id(self.sub_account_id),
             serialize_address(self.to_address),
-            serialize_token_id(self.token.id),
+            serialize_token_id(self.l2_source_token.id),
+            serialize_token_id(self.l1_target_token.id),
             int_to_bytes(self.amount, length=16),
             packed_fee_checked(self.fee),
             serialize_nonce(self.nonce),
-            serialize_timestamp(self.valid_from),
-            serialize_timestamp(self.valid_until)
+            int_to_bytes(self.fast_withdraw, 1),
+            int_to_bytes(self.withdraw_fee_ratio, 2),
+            serialize_timestamp(self.timestamp)
         ])
 
     def dict(self):
         return {
             "type": "Withdraw",
+            "toChainId": self.to_chain_id,
             "accountId": self.account_id,
-            "from": self.from_address,
+            "subAccountId": self.sub_account_id,
             "to": self.to_address,
-            "token": self.token.id,
+            "l2SourceToken": self.l2_source_token.id,
+            "l1TargetToken": self.l1_target_token.id,
             "fee": str(self.fee),
             "nonce": self.nonce,
             "signature": self.signature.dict(),
             "amount": str(self.amount),
-            "validFrom": self.valid_from,
-            "validUntil": self.valid_until,
+            "fastWithdraw": self.fast_withdraw,
+            "withdrawFeeRatio": self.withdraw_fee_ratio,
+            "ts": self.timestamp
         }
+
+    def tx_hash(self) -> str:
+        return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
 
 
 @dataclass

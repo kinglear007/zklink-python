@@ -6,6 +6,8 @@ AMOUNT_MANTISSA_BIT_WIDTH = 35
 FEE_EXPONENT_BIT_WIDTH = 5
 FEE_MANTISSA_BIT_WIDTH = 11
 MAX_NUMBER_OF_ACCOUNTS = 2 ** 24
+MAX_NUMBER_OF_CHAINS = 2 ** 8
+MAX_NUMBER_OF_SUB_ACCOUNTS = 2 ** 8
 MAX_NUMBER_OF_TOKENS = 2 ** 32 - 1
 
 
@@ -252,6 +254,22 @@ def serialize_account_id(account_id: int):
     if account_id > MAX_NUMBER_OF_ACCOUNTS:
         raise WrongValueError
     return int_to_bytes(account_id, 4)
+
+
+def serialize_chain_id(chain_id: int):
+    if chain_id < 0:
+        raise WrongValueError
+    if chain_id > MAX_NUMBER_OF_CHAINS:
+        raise WrongValueError
+    return int_to_bytes(chain_id, 1)
+
+
+def serialize_sub_account_id(sub_account_id: int):
+    if sub_account_id < 0:
+        raise WrongValueError
+    if sub_account_id > MAX_NUMBER_OF_SUB_ACCOUNTS:
+        raise WrongValueError
+    return int_to_bytes(sub_account_id, 1)
 
 
 def remove_address_prefix(address: str) -> str:
