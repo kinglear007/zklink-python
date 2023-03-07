@@ -5,8 +5,8 @@ from web3 import Account
 
 from zklink_sdk import ZkLinkLibrary, EthereumSignerWeb3
 from zklink_sdk.serializers import closest_packable_amount, closest_packable_transaction_fee
-from zklink_sdk.types import ChainId, ForcedExit, Token, Transfer, Withdraw, MintNFT, WithdrawNFT, Order, Swap, Tokens, \
-    EncodedTxValidator
+from zklink_sdk.types import ChainId, ChangePubKey, ForcedExit, Token, Transfer, Withdraw, MintNFT, WithdrawNFT, Order, \
+    Swap, Tokens, EncodedTxValidator
 from zklink_sdk.zklink_signer import ZkLinkSigner
 
 PRIVATE_KEY = "336b38ea188a4da28a9a3232a21359a51f6b3c5fdd844c122dd6d76d6605a4ec"
@@ -24,6 +24,17 @@ class ZkLinkSignerTest(TestCase):
         signer = ZkLinkSigner.from_account(account, self.library)
         assert signer.public_key.hex() == "b720c6110e673b55b5725dd0ff5778a8668ef4c7324718f78fa11def63081e85"
 
+    def test_change_pubkey_bytes(self):
+        tr = ChangePubKey(chain_id=1,
+                          fee_token=Token(id=1, address='', symbol='', decimals=18),
+                          fee=0, nonce=0, account_id=2, sub_account_id=1, timestamp=1654776640,
+                          new_pk_hash='sync:511494921e9aec60dfd65ce125dec96fe7c07133')
+
+        res = "06010000000201511494921e9aec60dfd65ce125dec96fe7c07133000100000000000062a1e340"
+        assert tr.encoded_message().hex() == res
+        hash = "sync-tx:f43ab3da7afbc99bcd05cfa1b1230e8121791ae7d11726c33a870bf2fd5b36d8"
+        assert tr.tx_hash() == hash
+
     def test_transfer_bytes(self):
         tr = Transfer(from_sub_account_id=1, to_sub_account_id=1,
                       to_address="0xdddd547fA95AdE4EF0C8B517dA7889A5F110eA38",
@@ -32,7 +43,7 @@ class ZkLinkSignerTest(TestCase):
                       nonce=3, timestamp=1670830922, account_id=15)
 
         res = "040000000f01dddd547fa95ade4ef0c8b517da7889a5f110ea3801002a4a817c80081dcc000000036396db4a"
-        assert tr.encoded_message() == res
+        assert tr.encoded_message().hex() == res
         hash = "sync-tx:f73678d4fa488a846dd89f059c6f2f29b3e79fe27bb162c878e1e0bb39236c17"
         assert tr.tx_hash() == hash
 
@@ -147,7 +158,7 @@ class ZkLinkSignerTest(TestCase):
 
     def test_forced_exit_bytes(self):
         tr = ForcedExit(
-            to_chain_id= 1, initiator_account_id= 1, initiator_sub_account_id= 0,
+            to_chain_id=1, initiator_account_id=1, initiator_sub_account_id=0,
             target="0x3498F456645270eE003441df82C718b56c0e6666", target_sub_account_id=0,
             l2_source_token=Token(id=1, address='', symbol='', decimals=18),
             l1_target_token=Token(id=17, address='', symbol='', decimals=18),
@@ -160,7 +171,6 @@ class ZkLinkSignerTest(TestCase):
 
         hash = "sync-tx:5c0dee07e26608bdc1ce7f66a6fc6eefe58012e17ef38b2f224f23b52f1deca1"
         assert tr.tx_hash() == hash
-
 
     # def test_mint_nft_bytes(self):
     #     tr = MintNFT(
@@ -200,16 +210,13 @@ class ZkLinkSignerTest(TestCase):
         account = Account.from_key(PRIVATE_KEY)
         # signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
         signer = ZkLinkSigner.from_account(account, self.library)
-        tr = Transfer(from_address="0xedE35562d3555e61120a151B3c8e8e91d83a378a",
-                      to_address="0x19aa2ed8712072e918632259780e587698ef58df",
-                      token=Token.eth(),
-                      amount=1000000000000,
-                      fee=1000000,
-                      nonce=12,
-                      valid_from=0,
-                      valid_until=4294967295, account_id=44)
+        tr = Transfer(from_sub_account_id=1, to_sub_account_id=1,
+                      to_address="0xdddd547fA95AdE4EF0C8B517dA7889A5F110eA38",
+                      token=Token(id=42, address='', symbol='', decimals=18),
+                      amount=1000000000000000000, fee=238000000000000,
+                      nonce=3, timestamp=1670830922, account_id=15)
         res = signer.sign_tx(tr)
-        assert res.signature == 'b3211c7e15d31d64619e0c7f65fce8c6e45637b5cfc8711478c5a151e6568d875ec7f48e040225fe3cc7f1e7294625cad6d98b4595d007d36ef62122de16ae01'
+        assert res.signature == '0ffe0eaef99542f1476c88cb4a0ec0de04382ae9db23070ba299d4dfe9d6a3939356fe614775d837d34c6e5ac3074ecf8ee3ccafab53f8f3d521900930f7af04'
 
 
 def check_bytes(a, b):

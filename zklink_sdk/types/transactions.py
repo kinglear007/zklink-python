@@ -155,44 +155,122 @@ class EncodedTx(abc.ABC):
         pass
 
 
+# @dataclass
+# class ChangePubKey(EncodedTx):
+#     account_id: int
+#     account: str
+#     new_pk_hash: str
+#     token: Token
+#     fee: int
+#     nonce: int
+#     valid_from: int
+#     valid_until: int
+#     eth_auth_data: Union[ChangePubKeyCREATE2, ChangePubKeyEcdsa, None] = None
+#     eth_signature: Optional[TxEthSignature] = None
+#     signature: Optional[TxSignature] = None
+#
+#     def human_readable_message(self) -> str:
+#         message = f"Set signing key: {self.new_pk_hash.replace('sync:', '').lower()}"
+#         if self.fee:
+#             message += f"\nFee: {self.fee} {self.token.symbol}"
+#         return message
+#
+#     def batch_message_part(self) -> str:
+#         message = f"Set signing key: {self.new_pk_hash.replace('sync:', '').lower()}\n"
+#         if self.fee:
+#             message += f"Fee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\n"
+#         return message
+#
+#     def encoded_message(self) -> bytes:
+#         return b"".join([
+#             int_to_bytes(0xff - self.tx_type(), 1),
+#             int_to_bytes(TRANSACTION_VERSION, 1),
+#             serialize_account_id(self.account_id),
+#             serialize_address(self.account),
+#             serialize_address(self.new_pk_hash),
+#             serialize_token_id(self.token.id),
+#             packed_fee_checked(self.fee),
+#             serialize_nonce(self.nonce),
+#             serialize_timestamp(self.valid_from),
+#             serialize_timestamp(self.valid_until)
+#         ])
+#
+#     def get_eth_tx_bytes(self) -> bytes:
+#         data = b"".join([
+#             serialize_address(self.new_pk_hash),
+#             serialize_nonce(self.nonce),
+#             serialize_account_id(self.account_id),
+#         ])
+#         if self.eth_auth_data is not None:
+#             data += self.eth_auth_data.encode_message()
+#         return data
+#
+#     def get_auth_data(self, signature: str):
+#         if self.eth_auth_data is None:
+#             return {"type": "Onchain"}
+#         elif isinstance(self.eth_auth_data, ChangePubKeyEcdsa):
+#             return self.eth_auth_data.dict(signature)
+#         elif isinstance(self.eth_auth_data, ChangePubKeyCREATE2):
+#             return self.eth_auth_data.dict()
+#
+#     def dict(self):
+#         return {
+#             "type": "ChangePubKey",
+#             "accountId": self.account_id,
+#             "account": self.account,
+#             "newPkHash": self.new_pk_hash,
+#             "fee_token": self.token.id,
+#             "fee": str(self.fee),
+#             "nonce": self.nonce,
+#             "ethAuthData": self.eth_auth_data,
+#             "signature": self.signature.dict(),
+#             "validFrom": self.valid_from,
+#             "validUntil": self.valid_until,
+#         }
+#
+#     @classmethod
+#     def tx_type(cls):
+#         return EncodedTxType.CHANGE_PUB_KEY
+
+
 @dataclass
 class ChangePubKey(EncodedTx):
+    chain_id: int
     account_id: int
-    account: str
+    sub_account_id: int
     new_pk_hash: str
-    token: Token
+    fee_token: Token
     fee: int
     nonce: int
-    valid_from: int
-    valid_until: int
+    timestamp: int
     eth_auth_data: Union[ChangePubKeyCREATE2, ChangePubKeyEcdsa, None] = None
     eth_signature: Optional[TxEthSignature] = None
+
     signature: Optional[TxSignature] = None
 
     def human_readable_message(self) -> str:
         message = f"Set signing key: {self.new_pk_hash.replace('sync:', '').lower()}"
         if self.fee:
-            message += f"\nFee: {self.fee} {self.token.symbol}"
+            message += f"\nFee: {self.fee} {self.fee_token.symbol}"
         return message
 
     def batch_message_part(self) -> str:
         message = f"Set signing key: {self.new_pk_hash.replace('sync:', '').lower()}\n"
         if self.fee:
-            message += f"Fee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\n"
+            message += f"Fee: {self.fee_token.decimal_str_amount(self.fee)} {self.fee_token.symbol}\n"
         return message
 
     def encoded_message(self) -> bytes:
         return b"".join([
-            int_to_bytes(0xff - self.tx_type(), 1),
-            int_to_bytes(TRANSACTION_VERSION, 1),
+            int_to_bytes(self.tx_type(), 1),
+            serialize_chain_id(self.chain_id),
             serialize_account_id(self.account_id),
-            serialize_address(self.account),
+            serialize_sub_account_id(self.sub_account_id),
             serialize_address(self.new_pk_hash),
-            serialize_token_id(self.token.id),
+            serialize_token_id(self.fee_token.id),
             packed_fee_checked(self.fee),
             serialize_nonce(self.nonce),
-            serialize_timestamp(self.valid_from),
-            serialize_timestamp(self.valid_until)
+            serialize_timestamp(self.timestamp)
         ])
 
     def get_eth_tx_bytes(self) -> bytes:
@@ -216,21 +294,25 @@ class ChangePubKey(EncodedTx):
     def dict(self):
         return {
             "type": "ChangePubKey",
+            "chainId": self.chain_id,
             "accountId": self.account_id,
-            "account": self.account,
+            "subAccountId": self.sub_account_id,
             "newPkHash": self.new_pk_hash,
-            "fee_token": self.token.id,
+            "feeToken": self.fee_token.id,
             "fee": str(self.fee),
             "nonce": self.nonce,
             "ethAuthData": self.eth_auth_data,
+            "ethSignature": self.eth_signature.dict(),
             "signature": self.signature.dict(),
-            "validFrom": self.valid_from,
-            "validUntil": self.valid_until,
+            "ts": self.timestamp
         }
 
     @classmethod
     def tx_type(cls):
         return EncodedTxType.CHANGE_PUB_KEY
+
+    def tx_hash(self) -> str:
+        return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
 
 
 # @dataclass
@@ -595,6 +677,7 @@ class ForcedExit(EncodedTx):
             "feeToken": self.fee_token.id,
             "fee": str(self.fee),
             "nonce": self.nonce,
+            "signature": self.signature.dict(),
             "ts": self.timestamp
         }
 
