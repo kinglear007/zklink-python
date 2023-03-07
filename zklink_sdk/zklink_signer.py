@@ -1,3 +1,5 @@
+import hashlib
+
 from eth_account.messages import encode_defunct
 from eth_account.signers.base import BaseAccount
 
@@ -63,3 +65,7 @@ class ZkLinkSigner:
     def sign_tx(self, message: EncodedTx) -> TxSignature:
         signature = self.library.sign(self.private_key, message.encoded_message())
         return TxSignature(signature=signature, public_key=self.public_key)
+
+    def sign_tx_as_submitter(self, message: EncodedTx) -> str:
+        signature = self.library.sign(self.private_key, hashlib.sha256(message.encoded_message()).digest())
+        return signature.hex()
