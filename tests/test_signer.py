@@ -5,8 +5,9 @@ from web3 import Account
 
 from zklink_sdk import ZkLinkLibrary, EthereumSignerWeb3
 from zklink_sdk.serializers import closest_packable_amount, closest_packable_transaction_fee
-from zklink_sdk.types import ChainId, ChangePubKey, ForcedExit, Token, Transfer, Withdraw, MintNFT, WithdrawNFT, Order, \
-    Swap, Tokens, EncodedTxValidator
+# from zklink_sdk.types import ChainId, ChangePubKey, ForcedExit, Token, Transfer, Withdraw, MintNFT, WithdrawNFT, Order, \
+#     Swap, Tokens, EncodedTxValidator
+from zklink_sdk.types import ChainId, ChangePubKey, ForcedExit, Token, Transfer, Withdraw, Tokens, EncodedTxValidator
 from zklink_sdk.zklink_signer import ZkLinkSigner
 
 PRIVATE_KEY = "336b38ea188a4da28a9a3232a21359a51f6b3c5fdd844c122dd6d76d6605a4ec"

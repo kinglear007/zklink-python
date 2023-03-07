@@ -71,60 +71,60 @@ class BatchBuilder:
         }
         self.transactions.append(withdraw)
 
-    def add_mint_nft(self,
-                     content_hash: str,
-                     recipient: str,
-                     fee_token: TokenLike,
-                     fee: Optional[Decimal] = None
-                     ):
-        mint_nft = {
-            self.ENCODED_TRANSACTION_TYPE: EncodedTxType.MINT_NFT,
-            self.IS_ENCODED_TRANSACTION: False,
-            "content_hash": content_hash,
-            "recipient": recipient,
-            "fee_token": fee_token,
-            "fee": fee
-        }
-        self.transactions.append(mint_nft)
+    # def add_mint_nft(self,
+    #                  content_hash: str,
+    #                  recipient: str,
+    #                  fee_token: TokenLike,
+    #                  fee: Optional[Decimal] = None
+    #                  ):
+    #     mint_nft = {
+    #         self.ENCODED_TRANSACTION_TYPE: EncodedTxType.MINT_NFT,
+    #         self.IS_ENCODED_TRANSACTION: False,
+    #         "content_hash": content_hash,
+    #         "recipient": recipient,
+    #         "fee_token": fee_token,
+    #         "fee": fee
+    #     }
+    #     self.transactions.append(mint_nft)
 
-    def add_withdraw_nft(self,
-                         to_address: str,
-                         nft_token: NFT,
-                         fee_token: TokenLike,
-                         fee: Optional[Decimal] = None,
-                         valid_from=DEFAULT_VALID_FROM,
-                         valid_until=DEFAULT_VALID_UNTIL
-                         ):
-        withdraw_nft = {
-            self.ENCODED_TRANSACTION_TYPE: EncodedTxType.WITHDRAW_NFT,
-            self.IS_ENCODED_TRANSACTION: False,
-            "to_address": to_address,
-            "nft_token": nft_token,
-            "fee_token": fee_token,
-            "fee": fee,
-            "valid_from": valid_from,
-            "valid_until": valid_until
-        }
-        self.transactions.append(withdraw_nft)
+    # def add_withdraw_nft(self,
+    #                      to_address: str,
+    #                      nft_token: NFT,
+    #                      fee_token: TokenLike,
+    #                      fee: Optional[Decimal] = None,
+    #                      valid_from=DEFAULT_VALID_FROM,
+    #                      valid_until=DEFAULT_VALID_UNTIL
+    #                      ):
+    #     withdraw_nft = {
+    #         self.ENCODED_TRANSACTION_TYPE: EncodedTxType.WITHDRAW_NFT,
+    #         self.IS_ENCODED_TRANSACTION: False,
+    #         "to_address": to_address,
+    #         "nft_token": nft_token,
+    #         "fee_token": fee_token,
+    #         "fee": fee,
+    #         "valid_from": valid_from,
+    #         "valid_until": valid_until
+    #     }
+    #     self.transactions.append(withdraw_nft)
 
-    def add_swap(self,
-                 orders: Tuple[Order, Order],
-                 fee_token: TokenLike,
-                 amounts: Optional[Tuple[Decimal, Decimal]] = None,
-                 fee: Optional[Decimal] = None
-                 ):
-        if amounts is None:
-            if orders[0].amount == 0 or orders[1].amount == 0:
-                raise AmountsMissing("in this case you must specify amounts explicitly")
-        swap = {
-            self.ENCODED_TRANSACTION_TYPE: EncodedTxType.SWAP,
-            self.IS_ENCODED_TRANSACTION: False,
-            "orders": orders,
-            "fee_token": fee_token,
-            "amounts": amounts,
-            "fee": fee
-        }
-        self.transactions.append(swap)
+    # def add_swap(self,
+    #              orders: Tuple[Order, Order],
+    #              fee_token: TokenLike,
+    #              amounts: Optional[Tuple[Decimal, Decimal]] = None,
+    #              fee: Optional[Decimal] = None
+    #              ):
+    #     if amounts is None:
+    #         if orders[0].amount == 0 or orders[1].amount == 0:
+    #             raise AmountsMissing("in this case you must specify amounts explicitly")
+    #     swap = {
+    #         self.ENCODED_TRANSACTION_TYPE: EncodedTxType.SWAP,
+    #         self.IS_ENCODED_TRANSACTION: False,
+    #         "orders": orders,
+    #         "fee_token": fee_token,
+    #         "amounts": amounts,
+    #         "fee": fee
+    #     }
+    #     self.transactions.append(swap)
 
     def add_transfer(self,
                      address_to: str,
@@ -369,134 +369,134 @@ class BatchBuilder:
         self.nonce += 1
         return forced_exit
 
-    async def _process_swap(self, obj):
-        if not obj[self.IS_ENCODED_TRANSACTION]:
-            fee_token = await self.wallet.resolve_token(obj["fee_token"])
-            fee = obj["fee"]
-            if fee is None:
-                fee = await self.wallet.zk_provider.get_transaction_fee(FeeTxType.swap,
-                                                                        self.wallet.address(),
-                                                                        fee_token.id)
-                fee = fee.total_fee
-            else:
-                fee = fee_token.from_decimal(fee)
+    # async def _process_swap(self, obj):
+    #     if not obj[self.IS_ENCODED_TRANSACTION]:
+    #         fee_token = await self.wallet.resolve_token(obj["fee_token"])
+    #         fee = obj["fee"]
+    #         if fee is None:
+    #             fee = await self.wallet.zk_provider.get_transaction_fee(FeeTxType.swap,
+    #                                                                     self.wallet.address(),
+    #                                                                     fee_token.id)
+    #             fee = fee.total_fee
+    #         else:
+    #             fee = fee_token.from_decimal(fee)
+    #
+    #         amounts = obj["amounts"]
+    #         orders = obj["orders"]
+    #         if amounts is None:
+    #             amounts = (orders[0].amount, orders[1].amount)
+    #         else:
+    #             amounts = (
+    #                 orders[0].token_sell.from_decimal(amounts[0]),
+    #                 orders[1].token_sell.from_decimal(amounts[1])
+    #             )
+    #         account_id = await self.wallet.get_account_id()
+    #         swap = Swap(
+    #             orders=orders,
+    #             fee_token=fee_token,
+    #             amounts=amounts,
+    #             fee=fee,
+    #             nonce=self.nonce,
+    #             submitter_id=account_id,
+    #             submitter_address=self.wallet.address()
+    #         )
+    #         swap.signature = self.wallet.zk_signer.sign_tx(swap)
+    #     else:
+    #         fee_token = await self.wallet.resolve_token(obj["feeToken"])
+    #         swap = Swap(
+    #             orders=obj["orders"],
+    #             fee_token=fee_token,
+    #             amounts=obj["amounts"],
+    #             fee=obj["fee"],
+    #             nonce=self.nonce,
+    #             submitter_id=obj["submitterId"],
+    #             submitter_address=obj["submitterAddress"],
+    #             signature=obj["signature"]
+    #         )
+    #     self.nonce += 1
+    #     return swap
 
-            amounts = obj["amounts"]
-            orders = obj["orders"]
-            if amounts is None:
-                amounts = (orders[0].amount, orders[1].amount)
-            else:
-                amounts = (
-                    orders[0].token_sell.from_decimal(amounts[0]),
-                    orders[1].token_sell.from_decimal(amounts[1])
-                )
-            account_id = await self.wallet.get_account_id()
-            swap = Swap(
-                orders=orders,
-                fee_token=fee_token,
-                amounts=amounts,
-                fee=fee,
-                nonce=self.nonce,
-                submitter_id=account_id,
-                submitter_address=self.wallet.address()
-            )
-            swap.signature = self.wallet.zk_signer.sign_tx(swap)
-        else:
-            fee_token = await self.wallet.resolve_token(obj["feeToken"])
-            swap = Swap(
-                orders=obj["orders"],
-                fee_token=fee_token,
-                amounts=obj["amounts"],
-                fee=obj["fee"],
-                nonce=self.nonce,
-                submitter_id=obj["submitterId"],
-                submitter_address=obj["submitterAddress"],
-                signature=obj["signature"]
-            )
-        self.nonce += 1
-        return swap
+    # async def _process_mint_nft(self, obj):
+    #     if not obj[self.IS_ENCODED_TRANSACTION]:
+    #         fee_token = await self.wallet.resolve_token(obj["fee_token"])
+    #         account_id = await self.wallet.get_account_id()
+    #
+    #         fee = obj["fee"]
+    #         if fee is None:
+    #             fee = await self.wallet.zk_provider.get_transaction_fee(FeeTxType.mint_nft,
+    #                                                                     obj["recipient"],
+    #                                                                     fee_token.id)
+    #             fee = fee.total_fee
+    #         else:
+    #             fee = fee_token.from_decimal(fee)
+    #         mint_nft = MintNFT(creator_id=account_id,
+    #                            creator_address=self.wallet.address(),
+    #                            content_hash=obj["content_hash"],
+    #                            recipient=obj["recipient"],
+    #                            fee=fee,
+    #                            fee_token=fee_token,
+    #                            nonce=self.nonce)
+    #         zk_signature = self.wallet.zk_signer.sign_tx(mint_nft)
+    #         mint_nft.signature = zk_signature
+    #     else:
+    #         fee_token = await self.wallet.resolve_token(obj["fee_token"])
+    #         mint_nft = MintNFT(creator_id=obj["creatorId"],
+    #                            creator_address=obj["creatorAddress"],
+    #                            content_hash=obj["content_hash"],
+    #                            recipient=obj["recipient"],
+    #                            fee=obj["fee"],
+    #                            fee_token=fee_token,
+    #                            nonce=self.nonce,
+    #                            signature=obj["signature"]
+    #                            )
+    #     self.nonce += 1
+    #     return mint_nft
 
-    async def _process_mint_nft(self, obj):
-        if not obj[self.IS_ENCODED_TRANSACTION]:
-            fee_token = await self.wallet.resolve_token(obj["fee_token"])
-            account_id = await self.wallet.get_account_id()
-
-            fee = obj["fee"]
-            if fee is None:
-                fee = await self.wallet.zk_provider.get_transaction_fee(FeeTxType.mint_nft,
-                                                                        obj["recipient"],
-                                                                        fee_token.id)
-                fee = fee.total_fee
-            else:
-                fee = fee_token.from_decimal(fee)
-            mint_nft = MintNFT(creator_id=account_id,
-                               creator_address=self.wallet.address(),
-                               content_hash=obj["content_hash"],
-                               recipient=obj["recipient"],
-                               fee=fee,
-                               fee_token=fee_token,
-                               nonce=self.nonce)
-            zk_signature = self.wallet.zk_signer.sign_tx(mint_nft)
-            mint_nft.signature = zk_signature
-        else:
-            fee_token = await self.wallet.resolve_token(obj["fee_token"])
-            mint_nft = MintNFT(creator_id=obj["creatorId"],
-                               creator_address=obj["creatorAddress"],
-                               content_hash=obj["content_hash"],
-                               recipient=obj["recipient"],
-                               fee=obj["fee"],
-                               fee_token=fee_token,
-                               nonce=self.nonce,
-                               signature=obj["signature"]
-                               )
-        self.nonce += 1
-        return mint_nft
-
-    async def _process_withdraw_nft(self, obj):
-        if not obj[self.IS_ENCODED_TRANSACTION]:
-            fee_token = await self.wallet.resolve_token(obj["fee_token"])
-
-            fee = obj["fee"]
-            if fee is None:
-                fee = await self.wallet.zk_provider.get_transaction_fee(FeeTxType.withdraw_nft,
-                                                                        obj["to_address"],
-                                                                        fee_token.id
-                                                                        )
-                fee = fee.total_fee
-            else:
-                fee = fee_token.from_decimal(fee)
-
-            account_id = await self.wallet.get_account_id()
-
-            withdraw_nft = WithdrawNFT(
-                account_id=account_id,
-                from_address=self.wallet.address(),
-                to_address=obj["to_address"],
-                fee_token=fee_token,
-                fee=fee,
-                nonce=self.nonce,
-                valid_from=obj["valid_from"],
-                valid_until=obj["valid_until"],
-                token_id=obj["nft_token"].id
-            )
-            zk_signature = self.wallet.zk_signer.sign_tx(withdraw_nft)
-            withdraw_nft.signature = zk_signature
-        else:
-            fee_token = await self.wallet.resolve_token(obj["feeToken"])
-            withdraw_nft = WithdrawNFT(
-                account_id=obj["accountId"],
-                from_address=obj["from"],
-                to_address=obj["to"],
-                fee_token=fee_token,
-                fee=obj["fee"],
-                nonce=obj["nonce"],
-                valid_from=obj["validFrom"],
-                valid_until=obj["validUntil"],
-                token_id=obj["nft_token"].id,
-                signature=obj["signature"]
-            )
-        self.nonce += 1
-        return withdraw_nft
+    # async def _process_withdraw_nft(self, obj):
+    #     if not obj[self.IS_ENCODED_TRANSACTION]:
+    #         fee_token = await self.wallet.resolve_token(obj["fee_token"])
+    #
+    #         fee = obj["fee"]
+    #         if fee is None:
+    #             fee = await self.wallet.zk_provider.get_transaction_fee(FeeTxType.withdraw_nft,
+    #                                                                     obj["to_address"],
+    #                                                                     fee_token.id
+    #                                                                     )
+    #             fee = fee.total_fee
+    #         else:
+    #             fee = fee_token.from_decimal(fee)
+    #
+    #         account_id = await self.wallet.get_account_id()
+    #
+    #         withdraw_nft = WithdrawNFT(
+    #             account_id=account_id,
+    #             from_address=self.wallet.address(),
+    #             to_address=obj["to_address"],
+    #             fee_token=fee_token,
+    #             fee=fee,
+    #             nonce=self.nonce,
+    #             valid_from=obj["valid_from"],
+    #             valid_until=obj["valid_until"],
+    #             token_id=obj["nft_token"].id
+    #         )
+    #         zk_signature = self.wallet.zk_signer.sign_tx(withdraw_nft)
+    #         withdraw_nft.signature = zk_signature
+    #     else:
+    #         fee_token = await self.wallet.resolve_token(obj["feeToken"])
+    #         withdraw_nft = WithdrawNFT(
+    #             account_id=obj["accountId"],
+    #             from_address=obj["from"],
+    #             to_address=obj["to"],
+    #             fee_token=fee_token,
+    #             fee=obj["fee"],
+    #             nonce=obj["nonce"],
+    #             valid_from=obj["validFrom"],
+    #             valid_until=obj["validUntil"],
+    #             token_id=obj["nft_token"].id,
+    #             signature=obj["signature"]
+    #         )
+    #     self.nonce += 1
+    #     return withdraw_nft
 
     async def _process_transactions(self):
         message = ""
@@ -539,35 +539,35 @@ class BatchBuilder:
 
                 message += tr.batch_message_part()
                 trs.append(TransactionWithOptionalSignature(tr))
-            elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.MINT_NFT:
-                tr = await self._process_mint_nft(obj)
-
-                prev_value = total_fee_map.get(tr.fee_token.symbol, Decimal(0))
-                dec_fee = tr.fee_token.decimal_amount(tr.fee)
-                total_fee_map[tr.fee_token.symbol] = dec_fee + prev_value
-
-                message += tr.batch_message_part()
-                trs.append(TransactionWithOptionalSignature(tr))
-            elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.WITHDRAW_NFT:
-                tr = await self._process_withdraw_nft(obj)
-
-                prev_value = total_fee_map.get(tr.fee_token.symbol, Decimal(0))
-                dec_fee = tr.fee_token.decimal_amount(tr.fee)
-                total_fee_map[tr.fee_token.symbol] = dec_fee + prev_value
-
-                message += tr.batch_message_part()
-                trs.append(TransactionWithOptionalSignature(tr))
-            elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.SWAP:
-                tr = await self._process_swap(obj)
-
-                prev_value = total_fee_map.get(tr.fee_token.symbol, Decimal(0))
-                dec_fee = tr.fee_token.decimal_amount(tr.fee)
-                total_fee_map[tr.fee_token.symbol] = dec_fee + prev_value
-                message += tr.batch_message_part()
-                trs.append(TransactionWithOptionalSignature(tr, [None,
-                                                                 tr.orders[0].eth_signature,
-                                                                 tr.orders[1].eth_signature]
-                                                            ))
+            # elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.MINT_NFT:
+            #     tr = await self._process_mint_nft(obj)
+            #
+            #     prev_value = total_fee_map.get(tr.fee_token.symbol, Decimal(0))
+            #     dec_fee = tr.fee_token.decimal_amount(tr.fee)
+            #     total_fee_map[tr.fee_token.symbol] = dec_fee + prev_value
+            #
+            #     message += tr.batch_message_part()
+            #     trs.append(TransactionWithOptionalSignature(tr))
+            # elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.WITHDRAW_NFT:
+            #     tr = await self._process_withdraw_nft(obj)
+            #
+            #     prev_value = total_fee_map.get(tr.fee_token.symbol, Decimal(0))
+            #     dec_fee = tr.fee_token.decimal_amount(tr.fee)
+            #     total_fee_map[tr.fee_token.symbol] = dec_fee + prev_value
+            #
+            #     message += tr.batch_message_part()
+            #     trs.append(TransactionWithOptionalSignature(tr))
+            # elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.SWAP:
+            #     tr = await self._process_swap(obj)
+            #
+            #     prev_value = total_fee_map.get(tr.fee_token.symbol, Decimal(0))
+            #     dec_fee = tr.fee_token.decimal_amount(tr.fee)
+            #     total_fee_map[tr.fee_token.symbol] = dec_fee + prev_value
+            #     message += tr.batch_message_part()
+            #     trs.append(TransactionWithOptionalSignature(tr, [None,
+            #                                                      tr.orders[0].eth_signature,
+            #                                                      tr.orders[1].eth_signature]
+            #                                                 ))
             else:
                 raise TypeError("_process_transactions is trying to process unimplemented type")
         message += f"Nonce: {self.batch_nonce}"
