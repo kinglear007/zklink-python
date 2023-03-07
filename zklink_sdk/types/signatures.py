@@ -27,7 +27,7 @@ class TxEthSignature:
 
     def dict(self):
         return {
-            "type":      self.sig_type.value,
+            "type": self.sig_type.value,
             "signature": self.signature
         }
 
@@ -53,7 +53,7 @@ class TxSignature:
 
     def dict(self):
         return {
-            "pubKey":    self.public_key,
+            "pubKey": self.public_key,
             "signature": self.signature
         }
 
@@ -79,6 +79,6 @@ class OrderSignature:
 
     def dict(self):
         return {
-            "pubKey":    self.public_key,
+            "pubKey": self.public_key,
             "signature": self.signature
         }

@@ -7,7 +7,9 @@ PRIVATE_KEY_LEN = 32
 PUBLIC_KEY_LEN = 32
 PUBKEY_HASH_LEN = 20
 PACKED_SIGNATURE_LEN = 64
-ORDER_LEN = 89
+
+RESCUE_HASH_LEN = 178
+ORDER_LEN = 38
 ORDERS_HASH_LEN = 31
 
 
@@ -84,9 +86,11 @@ class ZkLinkLibrary:
 
     def hash_orders(self, orders: bytes):
         assert len(orders) == ORDER_LEN * 2
+        padding_num = RESCUE_HASH_LEN - ORDER_LEN * 2
+        orders = orders + b'\x00' * padding_num
         orders_hash = ctypes.pointer(ZksOrdersHash())
         orders_bytes = ctypes.pointer(
-            ZksOrders(data=(c_ubyte * (ORDER_LEN * 2))(*orders)))
+            ZksOrders(data=(c_ubyte * RESCUE_HASH_LEN)(*orders)))
         self.lib.rescue_hash_orders(orders_bytes, len(orders), orders_hash)
         return bytes(orders_hash.contents.data)
 

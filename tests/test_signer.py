@@ -5,8 +5,6 @@ from web3 import Account
 
 from zklink_sdk import ZkLinkLibrary, EthereumSignerWeb3
 from zklink_sdk.serializers import closest_packable_amount, closest_packable_transaction_fee
-# from zklink_sdk.types import ChainId, ChangePubKey, ForcedExit, Token, Transfer, Withdraw, MintNFT, WithdrawNFT, Order, \
-#     Swap, Tokens, EncodedTxValidator
 from zklink_sdk.types import ChainId, Order, ChangePubKey, ForcedExit, Token, Transfer, Withdraw, Tokens, \
     EncodedTxValidator
 from zklink_sdk.zklink_signer import ZkLinkSigner
@@ -22,7 +20,6 @@ class ZkLinkSignerTest(TestCase):
 
     def test_derive_pub_key(self):
         account = Account.from_key(PRIVATE_KEY)
-        # signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
         signer = ZkLinkSigner.from_account(account, self.library)
         assert signer.public_key.hex() == "b720c6110e673b55b5725dd0ff5778a8668ef4c7324718f78fa11def63081e85"
 
@@ -62,102 +59,6 @@ class ZkLinkSignerTest(TestCase):
         hash = "sync-tx:af3da9462520230a29e6c3b72f9da95c015c4b9ca013534f49b867b3fa07ad8d"
         assert tr.tx_hash() == hash
 
-    # def test_order_bytes(self):
-    #     token1 = Token.eth()
-    #     token2 = Token(id=2, symbol='', address='', decimals=0)  # only id matters
-    #     order = Order(account_id=6, nonce=18, token_sell=token1, token_buy=token2,
-    #                   ratio=Fraction(1, 2), amount=1000000,
-    #                   recipient='0x823b6a996cea19e0c41e250b20e2e804ea72ccdf',
-    #                   valid_from=0, valid_until=4294967295)
-    #     res = '6f0100000006823b6a996cea19e0c41e250b20e2e804ea72ccdf0000001200000000000000020000000000000000000000000000010000000000000000000000000000020001e84800000000000000000000000000ffffffff'
-    #     assert order.encoded_message().hex() == res
-
-    # def test_swap_bytes(self):
-    #     token1 = Token(id=1, symbol='', address='', decimals=0)  # only id matters
-    #     token2 = Token(id=2, symbol='', address='', decimals=0)  # only id matters
-    #     token3 = Token(id=3, symbol='', address='', decimals=0)  # only id matters
-    #     order1 = Order(account_id=6, nonce=18, token_sell=token1, token_buy=token2,
-    #                    ratio=Fraction(1, 2), amount=1000000,
-    #                    recipient='0x823b6a996cea19e0c41e250b20e2e804ea72ccdf',
-    #                    valid_from=0, valid_until=4294967295)
-    #     order2 = Order(account_id=44, nonce=101, token_sell=token2, token_buy=token1,
-    #                    ratio=Fraction(3, 1), amount=2500000,
-    #                    recipient='0x63adbb48d1bc2cf54562910ce54b7ca06b87f319',
-    #                    valid_from=0, valid_until=4294967295)
-    #     swap = Swap(orders=(order1, order2), nonce=1, amounts=(1000000, 2500000),
-    #                 submitter_id=5, submitter_address="0xedE35562d3555e61120a151B3c8e8e91d83a378a",
-    #                 fee_token=token3, fee=123)
-    #     res = "f40100000005ede35562d3555e61120a151b3c8e8e91d83a378a000000017b1e76f6f124bae1917435a02cfbf5571d79ddb8380bc4bf4858c9e9969487000000030f600001e848000004c4b400"
-    #     assert swap.encoded_message().hex() == res
-
-    # def test_order_deserialization(self):
-    #     token1 = Token(id=1, symbol='', address='', decimals=0)  # only id matters
-    #     token2 = Token(id=2, symbol='', address='', decimals=0)  # only id matters
-    #     tokens = Tokens(tokens=[token1, token2])
-    #
-    #     order = Order(account_id=7, nonce=18, token_sell=token1, token_buy=token2,
-    #                   ratio=Fraction(1, 4), amount=1000000,
-    #                   recipient='0x823b6a996cea19e0c41e250b20e2e804ea72ccdf',
-    #                   valid_from=0, valid_until=4294967295)
-    #     serialized_order = order.dict()
-    #     from_json_order = Order.from_json(serialized_order, tokens)
-    #     self.assertEqual(order.account_id, from_json_order.account_id)
-    #     self.assertEqual(order.nonce, from_json_order.nonce)
-    #     self.assertEqual(order.token_sell, from_json_order.token_sell)
-    #     self.assertEqual(order.token_buy, from_json_order.token_buy)
-    #     self.assertEqual(order.ratio, from_json_order.ratio)
-    #     self.assertEqual(order.recipient, from_json_order.recipient)
-    #     self.assertEqual(order.valid_from, from_json_order.valid_from)
-    #     self.assertEqual(order.valid_until, from_json_order.valid_until)
-
-    # def test_order_zklink_signature_checking(self):
-    #     account = Account.from_key(PRIVATE_KEY)
-    #     # signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
-    #     signer = ZkLinkSigner.from_account(account, self.library)
-    #
-    #     token1 = Token(id=1, symbol='', address='', decimals=0)  # only id matters
-    #     token2 = Token(id=2, symbol='', address='', decimals=0)  # only id matters
-    #     tokens_pool = Tokens(tokens=[token1, token2])
-    #
-    #     order = Order(account_id=7, nonce=18, token_sell=token1, token_buy=token2,
-    #                   ratio=Fraction(1, 4), amount=1000000,
-    #                   recipient='0x823b6a996cea19e0c41e250b20e2e804ea72ccdf',
-    #                   valid_from=0, valid_until=4294967295)
-    #
-    #     order.signature = signer.sign_tx(order)
-    #
-    #     validator = EncodedTxValidator(self.library)
-    #     serialized_order = json.dumps(order.dict(), indent=4)
-    #     print(f"json : {serialized_order}")
-    #     deserialized_order = Order.from_json(json.loads(serialized_order), tokens_pool)
-    #     ret = validator.is_valid_signature(deserialized_order)
-    #     self.assertTrue(ret)
-
-    # def test_is_valid_order_deserialized(self):
-    #     account = Account.from_key(PRIVATE_KEY)
-    #     # zklink_signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
-    #     zklink_signer = ZkLinkSigner.from_account(account, self.library)
-    #     ethereum_signer = EthereumSignerWeb3(account=account)
-    #
-    #     token1 = Token(id=1, symbol='', address='', decimals=0)  # only id matters
-    #     token2 = Token(id=2, symbol='', address='', decimals=0)  # only id matters
-    #     tokens_pool = Tokens(tokens=[token1, token2])
-    #
-    #     order = Order(account_id=7, nonce=18, token_sell=token1, token_buy=token2,
-    #                   ratio=Fraction(1, 4), amount=1000000,
-    #                   recipient='0x823b6a996cea19e0c41e250b20e2e804ea72ccdf',
-    #                   valid_from=0, valid_until=4294967295)
-    #     order.signature = zklink_signer.sign_tx(order)
-    #     order.eth_signature = ethereum_signer.sign_tx(order)
-    #     zklink_validator = EncodedTxValidator(self.library)
-    #     serialized_order = json.dumps(order.dict(), indent=4)
-    #
-    #     deserialized_order = Order.from_json(json.loads(serialized_order), tokens_pool)
-    #     ret = zklink_validator.is_valid_signature(deserialized_order)
-    #     self.assertTrue(ret)
-    #     ret = deserialized_order.is_valid_eth_signature(ethereum_signer.address())
-    #     self.assertTrue(ret)
-
     def test_forced_exit_bytes(self):
         tr = ForcedExit(
             to_chain_id=1, initiator_account_id=1, initiator_sub_account_id=0,
@@ -174,34 +75,6 @@ class ZkLinkSignerTest(TestCase):
         hash = "sync-tx:5c0dee07e26608bdc1ce7f66a6fc6eefe58012e17ef38b2f224f23b52f1deca1"
         assert tr.tx_hash() == hash
 
-    # def test_mint_nft_bytes(self):
-    #     tr = MintNFT(
-    #         creator_id=44,
-    #         creator_address="0xedE35562d3555e61120a151B3c8e8e91d83a378a",
-    #         content_hash="0000000000000000000000000000000000000000000000000000000000000123",
-    #         recipient="0x19aa2ed8712072e918632259780e587698ef58df",
-    #         fee=1000000,
-    #         fee_token=Token.eth(),
-    #         nonce=12
-    #     )
-    #     res = "f6010000002cede35562d3555e61120a151b3c8e8e91d83a378a000000000000000000000000000000000000000000000000000000000000012319aa2ed8712072e918632259780e587698ef58df000000007d030000000c"
-    #     assert tr.encoded_message().hex() == res
-
-    # def test_withdraw_nft_bytes(self):
-    #     tr = WithdrawNFT(
-    #         account_id=44,
-    #         from_address="0xedE35562d3555e61120a151B3c8e8e91d83a378a",
-    #         to_address="0x19aa2ed8712072e918632259780e587698ef58df",
-    #         fee_token=Token.eth(),
-    #         fee=1000000,
-    #         nonce=12,
-    #         valid_from=0,
-    #         valid_until=4294967295,
-    #         token_id=100000
-    #     )
-    #     res = "f5010000002cede35562d3555e61120a151b3c8e8e91d83a378a19aa2ed8712072e918632259780e587698ef58df000186a0000000007d030000000c000000000000000000000000ffffffff"
-    #     assert tr.encoded_message().hex() == res
-
     def test_pack(self):
         amounts = [0, 1, 2047, 2047000, 1000000000000000000000000000000000]
         for amount in amounts:
@@ -210,7 +83,6 @@ class ZkLinkSignerTest(TestCase):
 
     def test_signature(self):
         account = Account.from_key(PRIVATE_KEY)
-        # signer = ZkLinkSigner.from_account(account, self.library, ChainId.MAINNET)
         signer = ZkLinkSigner.from_account(account, self.library)
         tr = Transfer(from_sub_account_id=1, to_sub_account_id=1,
                       to_address="0xdddd547fA95AdE4EF0C8B517dA7889A5F110eA38",

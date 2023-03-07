@@ -16,9 +16,9 @@ class TestZkLinkContract(TestCase):
                              web3=w3,
                              zklink_contract_address="0x82F67958A5474e40E1485742d648C0b0686b6e5D")
 
-    # def test_deposit_eth(self):
-    #     tx = self.zklink.deposit_eth(self.account.address, 2 * 10 ** 12)
-    #     assert tx['transactionHash']
+    def test_deposit_eth(self):
+        tx = self.zklink.deposit_eth(self.account.address, 2 * 10 ** 12)
+        assert tx['transactionHash']
 
     def test_full_exit(self):
         tx = self.zklink.full_exit(1, "0x3B00Ef435fA4FcFF5C209a37d1f3dcff37c705aD")

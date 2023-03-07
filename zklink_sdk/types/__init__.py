@@ -8,11 +8,6 @@ from .auth_types import *
 
 class ChainId(IntEnum):
     MAINNET = 1
-    # RINKEBY = 4
-    # ROPSTEN = 3
-    # GOERLI = 420
-    # SEPOLIA = 11155111
-    # LOCALHOST = 9
 
 
 class SubAccountId(IntEnum):

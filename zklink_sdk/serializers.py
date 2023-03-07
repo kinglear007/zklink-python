@@ -228,12 +228,6 @@ def serialize_nonce(nonce: int):
     return int_to_bytes(nonce, 4)
 
 
-# def serialize_timestamp(timestamp: int):
-#     if timestamp < 0:
-#         raise WrongValueError
-#     return b"\x00" * 4 + int_to_bytes(timestamp, 4)
-
-
 def serialize_timestamp(timestamp: int):
     if timestamp < 0:
         raise WrongValueError
@@ -241,13 +235,6 @@ def serialize_timestamp(timestamp: int):
         raise WrongValueError
     return int_to_bytes(timestamp, 4)
 
-
-# def serialize_token_id(token_id: int):
-#     if token_id < 0:
-#         raise WrongValueError
-#     if token_id > MAX_NUMBER_OF_TOKENS:
-#         raise WrongValueError
-#     return int_to_bytes(token_id, 4)
 
 def serialize_token_id(token_id: int):
     if token_id < 0:

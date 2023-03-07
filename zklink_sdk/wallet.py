@@ -5,12 +5,6 @@ from typing import List, Optional, Tuple, Union
 
 from zklink_sdk.ethereum_provider import EthereumProvider
 from zklink_sdk.ethereum_signer import EthereumSignerInterface
-# from zklink_sdk.types import (ChangePubKey, ChangePubKeyCREATE2, ChangePubKeyEcdsa,
-#                               ChangePubKeyTypes, EncodedTx, ForcedExit, Token, TokenLike,
-#                               Tokens, TransactionWithSignature, Transfer, TxEthSignature,
-#                               Withdraw, MintNFT, WithdrawNFT, NFT, Order, Swap, RatioType,
-#                               token_ratio_to_wei_ratio, get_toggle_message, get_toggle_message_with_pub, Toggle2FA)
-
 from zklink_sdk.types import (ChangePubKey, ChangePubKeyCREATE2, ChangePubKeyEcdsa,
                               ChangePubKeyTypes, EncodedTx, ForcedExit, Token, TokenLike,
                               Tokens, TransactionWithSignature, Transfer, TxEthSignature,
@@ -182,100 +176,6 @@ class Wallet:
 
         return forced_exit, eth_signature
 
-    async def mint_nft(self, content_hash: str, recipient: str, token: TokenLike,
-                       fee: Optional[Decimal] = None) -> Transaction:
-        token_obj = await self.resolve_token(token)
-
-        nonce = await self.zk_provider.get_account_nonce(self.address())
-        if fee is None:
-            fee_obj = await self.zk_provider.get_transaction_fee(FeeTxType.mint_nft, recipient, token_obj.id)
-            fee_int = fee_obj.total_fee
-        else:
-            fee_int = token_obj.from_decimal(fee)
-
-        mint_nft, eth_signature = await self.build_mint_nft(content_hash, recipient, token_obj, fee_int, nonce)
-        return await self.send_signed_transaction(mint_nft, eth_signature)
-
-    # This function takes as a parameter the integer fee of 
-    # lowest token denominations (wei, satoshi, etc.)
-    # async def build_mint_nft(
-    #         self,
-    #         content_hash: str,
-    #         recipient: str,
-    #         token: Token,
-    #         fee: int,
-    #         nonce: Optional[int] = None
-    # ) -> Tuple[MintNFT, TxEthSignature]:
-    #     if nonce is None:
-    #         nonce = await self.zk_provider.get_account_nonce(self.address())
-    #     account_id = await self.get_account_id()
-    #
-    #     mint_nft = MintNFT(creator_id=account_id,
-    #                        creator_address=self.address(),
-    #                        content_hash=content_hash,
-    #                        recipient=recipient,
-    #                        fee=fee,
-    #                        fee_token=token,
-    #                        nonce=nonce)
-    #     eth_signature = self.eth_signer.sign_tx(mint_nft)
-    #     zk_signature = self.zk_signer.sign_tx(mint_nft)
-    #     mint_nft.signature = zk_signature
-    #
-    #     return mint_nft, eth_signature
-
-    # async def withdraw_nft(
-    #         self,
-    #         to_address: str,
-    #         nft_token: NFT,
-    #         fee_token: TokenLike,
-    #         fee: Optional[Decimal] = None,
-    #         valid_from=DEFAULT_VALID_FROM,
-    #         valid_until=DEFAULT_VALID_UNTIL
-    # ) -> Transaction:
-    #     nonce = await self.zk_provider.get_account_nonce(self.address())
-    #     fee_token_obj = await self.resolve_token(fee_token)
-    #
-    #     if fee is None:
-    #         fee_obj = await self.zk_provider.get_transaction_fee(FeeTxType.withdraw_nft, to_address, fee_token_obj.id)
-    #         fee_int = fee_obj.total_fee
-    #     else:
-    #         fee_int = fee_token_obj.from_decimal(fee)
-    #     withdraw_nft, eth_signature = await self.build_withdraw_nft(to_address, nft_token, fee_token_obj, fee_int,
-    #                                                                 nonce, valid_from, valid_until)
-    #     return await self.send_signed_transaction(withdraw_nft, eth_signature)
-
-    # This function takes as a parameter the integer fee of 
-    # lowest token denominations (wei, satoshi, etc.)
-    # async def build_withdraw_nft(
-    #         self,
-    #         to_address: str,
-    #         nft_token: NFT,
-    #         fee_token: Token,
-    #         fee: int,
-    #         nonce: Optional[int] = None,
-    #         valid_from=DEFAULT_VALID_FROM,
-    #         valid_until=DEFAULT_VALID_UNTIL
-    # ) -> Tuple[WithdrawNFT, TxEthSignature]:
-    #     if nonce is None:
-    #         nonce = await self.zk_provider.get_account_nonce(self.address())
-    #     account_id = await self.get_account_id()
-    #
-    #     withdraw_nft = WithdrawNFT(
-    #         account_id=account_id,
-    #         from_address=self.address(),
-    #         to_address=to_address,
-    #         fee_token=fee_token,
-    #         fee=fee,
-    #         nonce=nonce,
-    #         valid_from=valid_from,
-    #         valid_until=valid_until,
-    #         token_id=nft_token.id)
-    #     eth_signature = self.eth_signer.sign_tx(withdraw_nft)
-    #     zk_signature = self.zk_signer.sign_tx(withdraw_nft)
-    #     withdraw_nft.signature = zk_signature
-    #
-    #     return withdraw_nft, eth_signature
-
     def address(self):
         return self.eth_signer.address()
 
@@ -326,31 +226,6 @@ class Wallet:
                                                             valid_until)
         return await self.send_signed_transaction(transfer, eth_signature)
 
-    # async def transfer_nft(self, to: str, nft: NFT, fee_token: TokenLike,
-    #                        fee: Optional[Decimal] = None,
-    #                        valid_from=DEFAULT_VALID_FROM,
-    #                        valid_until=DEFAULT_VALID_UNTIL
-    #                        ) -> List[Transaction]:
-    #     nonce = await self.zk_provider.get_account_nonce(self.address())
-    #     fee_token_obj = await self.resolve_token(fee_token)
-    #
-    #     if fee is None:
-    #         fee_int = await self.zk_provider.get_transactions_batch_fee(
-    #             [FeeTxType.transfer, FeeTxType.transfer],
-    #             [to, self.address()],
-    #             fee_token_obj.symbol
-    #         )
-    #     else:
-    #         fee_int = fee_token_obj.from_decimal(fee)
-    #
-    #     nft_tx = await self.build_transfer(to, 1, nft, 0, nonce, valid_from, valid_until)
-    #     fee_tx = await self.build_transfer(self.address(), 0, fee_token_obj, fee_int, nonce + 1, valid_from, valid_until)
-    #     batch = [
-    #         TransactionWithSignature(nft_tx[0], nft_tx[1]),
-    #         TransactionWithSignature(fee_tx[0], fee_tx[1])
-    #     ]
-    #     return await self.send_txs_batch(batch)
-
     async def get_order(self, token_sell: TokenLike, token_buy: TokenLike,
                         ratio: Fraction, ratio_type: RatioType, amount: Decimal,
                         recipient: Optional[str] = None,
@@ -390,48 +265,7 @@ class Wallet:
         return await self.get_order(token_sell, token_buy, ratio, ratio_type, Decimal(0), recipient, valid_from,
                                     valid_until)
 
-    # This function takes as a parameter the integer amounts/fee of 
-    # lowest token denominations (wei, satoshi, etc.)
-    # async def build_swap(self, orders: Tuple[Order, Order], fee_token: Token,
-    #                      amounts: Tuple[int, int], fee: int, nonce: Optional[int] = None):
-    #     if nonce is None:
-    #         nonce = await self.zk_provider.get_account_nonce(self.address())
-    #     account_id = await self.get_account_id()
-    #
-    #     swap = Swap(
-    #         orders=orders, fee_token=fee_token, amounts=amounts, fee=fee, nonce=nonce,
-    #         submitter_id=account_id, submitter_address=self.address()
-    #     )
-    #     eth_signature = self.eth_signer.sign_tx(swap)
-    #     swap.signature = self.zk_signer.sign_tx(swap)
-    #     return swap, eth_signature
-
-    # async def swap(self, orders: Tuple[Order, Order], fee_token: TokenLike,
-    #                amounts: Optional[Tuple[Decimal, Decimal]] = None, fee: Optional[Decimal] = None):
-    #     nonce = await self.zk_provider.get_account_nonce(self.address())
-    #
-    #     fee_token_obj = await self.resolve_token(fee_token)
-    #     if fee is None:
-    #         fee_obj = await self.zk_provider.get_transaction_fee(FeeTxType.swap, self.address(), fee_token_obj.id)
-    #         fee_int = fee_obj.total_fee
-    #     else:
-    #         fee_int = fee_token_obj.from_decimal(fee)
-    #
-    #     if amounts is None:
-    #         amounts_int = (orders[0].amount, orders[1].amount)
-    #         if amounts_int[0] == 0 or amounts_int[1] == 0:
-    #             raise AmountsMissing("in this case you must specify amounts explicitly")
-    #     else:
-    #         amounts_int = (
-    #             orders[0].token_sell.from_decimal(amounts[0]),
-    #             orders[1].token_sell.from_decimal(amounts[1])
-    #         )
-    #
-    #     swap, eth_signature = await self.build_swap(orders, fee_token_obj, amounts_int, fee_int, nonce)
-    #     eth_signatures = [eth_signature, swap.orders[0].eth_signature, swap.orders[1].eth_signature]
-    #     return await self.send_signed_transaction(swap, eth_signatures)
-
-    # This function takes as a parameter the integer amount/fee of 
+    # This function takes as a parameter the integer amount/fee of
     # lowest token denominations (wei, satoshi, etc.)
     async def build_withdraw(self, eth_address: str, amount: int, token: Token,
                              fee: int,
