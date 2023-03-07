@@ -7,7 +7,8 @@ from zklink_sdk import ZkLinkLibrary, EthereumSignerWeb3
 from zklink_sdk.serializers import closest_packable_amount, closest_packable_transaction_fee
 # from zklink_sdk.types import ChainId, ChangePubKey, ForcedExit, Token, Transfer, Withdraw, MintNFT, WithdrawNFT, Order, \
 #     Swap, Tokens, EncodedTxValidator
-from zklink_sdk.types import ChainId, ChangePubKey, ForcedExit, Token, Transfer, Withdraw, Tokens, EncodedTxValidator
+from zklink_sdk.types import ChainId, Order, ChangePubKey, ForcedExit, Token, Transfer, Withdraw, Tokens, \
+    EncodedTxValidator
 from zklink_sdk.zklink_signer import ZkLinkSigner
 
 PRIVATE_KEY = "336b38ea188a4da28a9a3232a21359a51f6b3c5fdd844c122dd6d76d6605a4ec"
@@ -218,6 +219,21 @@ class ZkLinkSignerTest(TestCase):
                       nonce=3, timestamp=1670830922, account_id=15)
         res = signer.sign_tx(tr)
         assert res.signature == '0ffe0eaef99542f1476c88cb4a0ec0de04382ae9db23070ba299d4dfe9d6a3939356fe614775d837d34c6e5ac3074ecf8ee3ccafab53f8f3d521900930f7af04'
+
+    def test_order(self):
+        account = Account.from_key("336b38ea188a4da28a9a3232a21359a51f6b3c5fdd844c122dd6d76d6605a4ec")
+        signer = ZkLinkSigner.from_account(account, self.library)
+        tr = Order(account_id=6, price=1500000000000000000, amount=100000000000000000000,
+                   sub_account_id=1, slot=1, nonce=1,
+                   base_token=Token(id=6, address='', symbol='', decimals=18),
+                   quote_token=Token(id=7, address='', symbol='', decimals=18),
+                   is_sell=0, taker_fee_ratio=10, maker_fee_ratio=5)
+
+        res = "ff00000006010001000001000600070000000000000014d1120d7b16000000050a4a817c800a"
+        assert tr.encoded_message().hex() == res
+
+        res = signer.sign_order(tr)
+        assert res.signature == '7e00ed99c8be5e7ac9d9e2e1c5bf8ed6a5e28f1c91a0891d89a0eecd57ea411acc86a9e2073486235c0941b0666d928c109802e2a971571f3a7e845fcc087e01'
 
 
 def check_bytes(a, b):

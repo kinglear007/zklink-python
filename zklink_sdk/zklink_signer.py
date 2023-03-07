@@ -4,7 +4,7 @@ from eth_account.messages import encode_defunct
 from eth_account.signers.base import BaseAccount
 
 from zklink_sdk import ZkLinkLibrary
-from zklink_sdk.types import ChainId, EncodedTx, TxSignature
+from zklink_sdk.types import ChainId, EncodedTx, TxSignature, Order, OrderSignature
 
 
 # def derive_private_key(library: ZkLinkLibrary, message: str, account: BaseAccount,
@@ -61,6 +61,10 @@ class ZkLinkSigner:
 
     def pubkey_hash(self):
         return self.library.get_pubkey_hash(self.public_key)
+
+    def sign_order(self, message: Order) -> OrderSignature:
+        signature = self.library.sign(self.private_key, message.encoded_message())
+        return OrderSignature(signature=signature, public_key=self.public_key)
 
     def sign_tx(self, message: EncodedTx) -> TxSignature:
         signature = self.library.sign(self.private_key, message.encoded_message())

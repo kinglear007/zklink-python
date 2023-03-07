@@ -5,10 +5,16 @@ from typing import List, Optional, Tuple, Union
 
 from zklink_sdk.ethereum_provider import EthereumProvider
 from zklink_sdk.ethereum_signer import EthereumSignerInterface
+# from zklink_sdk.types import (ChangePubKey, ChangePubKeyCREATE2, ChangePubKeyEcdsa,
+#                               ChangePubKeyTypes, EncodedTx, ForcedExit, Token, TokenLike,
+#                               Tokens, TransactionWithSignature, Transfer, TxEthSignature,
+#                               Withdraw, MintNFT, WithdrawNFT, NFT, Order, Swap, RatioType,
+#                               token_ratio_to_wei_ratio, get_toggle_message, get_toggle_message_with_pub, Toggle2FA)
+
 from zklink_sdk.types import (ChangePubKey, ChangePubKeyCREATE2, ChangePubKeyEcdsa,
                               ChangePubKeyTypes, EncodedTx, ForcedExit, Token, TokenLike,
                               Tokens, TransactionWithSignature, Transfer, TxEthSignature,
-                              Withdraw, MintNFT, WithdrawNFT, NFT, Order, Swap, RatioType,
+                              Withdraw, Order, RatioType,
                               token_ratio_to_wei_ratio, get_toggle_message, get_toggle_message_with_pub, Toggle2FA)
 from zklink_sdk.zklink_provider import FeeTxType, ZkLinkProviderInterface
 from zklink_sdk.zklink_signer import ZkLinkSigner
@@ -75,17 +81,17 @@ class Wallet:
         if fee is None:
             if eth_auth_type == ChangePubKeyTypes.ecdsa:
                 fee_obj = await self.zk_provider.get_transaction_fee(FeeTxType.change_pub_key_ecdsa,
-                                                                 self.address(),
-                                                                 fee_token_obj.id)
+                                                                     self.address(),
+                                                                     fee_token_obj.id)
             elif eth_auth_type == ChangePubKeyTypes.onchain:
                 fee_obj = await self.zk_provider.get_transaction_fee(FeeTxType.change_pub_key_onchain,
-                                                                 self.address(),
-                                                                 fee_token_obj.id)
+                                                                     self.address(),
+                                                                     fee_token_obj.id)
             else:
                 assert eth_auth_type == ChangePubKeyTypes.create2, "invalid eth_auth_type"
                 fee_obj = await self.zk_provider.get_transaction_fee(FeeTxType.change_pub_key_create2,
-                                                                 self.address(),
-                                                                 fee_token_obj.id)
+                                                                     self.address(),
+                                                                     fee_token_obj.id)
             fee_int = fee_obj.total_fee
         else:
             fee_int = fee_token_obj.from_decimal(fee)
@@ -176,7 +182,8 @@ class Wallet:
 
         return forced_exit, eth_signature
 
-    async def mint_nft(self, content_hash: str, recipient: str,token: TokenLike, fee: Optional[Decimal] = None) -> Transaction:
+    async def mint_nft(self, content_hash: str, recipient: str, token: TokenLike,
+                       fee: Optional[Decimal] = None) -> Transaction:
         token_obj = await self.resolve_token(token)
 
         nonce = await self.zk_provider.get_account_nonce(self.address())
@@ -315,7 +322,8 @@ class Wallet:
 
         amount_int = token_obj.from_decimal(amount)
 
-        transfer, eth_signature = await self.build_transfer(to, amount_int, token_obj, fee_int, nonce, valid_from, valid_until)
+        transfer, eth_signature = await self.build_transfer(to, amount_int, token_obj, fee_int, nonce, valid_from,
+                                                            valid_until)
         return await self.send_signed_transaction(transfer, eth_signature)
 
     # async def transfer_nft(self, to: str, nft: NFT, fee_token: TokenLike,

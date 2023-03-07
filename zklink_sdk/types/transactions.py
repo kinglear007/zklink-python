@@ -13,8 +13,9 @@ from zklink_sdk.serializers import (int_to_bytes, packed_amount_checked, packed_
                                     serialize_address, serialize_content_hash,
                                     serialize_nonce, serialize_timestamp,
                                     serialize_token_id, serialize_ratio_part,
-                                    serialize_sub_account_id, serialize_chain_id)
-from zklink_sdk.types.signatures import TxEthSignature, TxSignature
+                                    serialize_sub_account_id, serialize_chain_id,
+                                    serialize_slot_id, serialize_order_nonce)
+from zklink_sdk.types.signatures import TxEthSignature, TxSignature, OrderSignature
 from zklink_sdk.types.auth_types import ChangePubKeyCREATE2, ChangePubKeyEcdsa
 
 DEFAULT_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"
@@ -127,6 +128,53 @@ class Tokens(BaseModel):
             if result is None:
                 result = self.find_by_symbol(symbol=token)
         return result
+
+
+class Order(BaseModel):
+    account_id: int
+    sub_account_id: int
+    slot: int
+    nonce: int
+    base_token: Token
+    quote_token: Token
+    amount: int
+    price: int
+    is_sell: int
+    maker_fee_ratio: int
+    taker_fee_ratio: int
+    signature: Optional[OrderSignature]
+
+    def encoded_message(self) -> bytes:
+        return b"".join([
+            int_to_bytes(0xff, 1),
+            serialize_account_id(self.account_id),
+            serialize_sub_account_id(self.sub_account_id),
+            serialize_slot_id(self.slot),
+            serialize_order_nonce(self.nonce),
+            serialize_token_id(self.base_token.id),
+            serialize_token_id(self.quote_token.id),
+            int_to_bytes(self.price, 15),
+            int_to_bytes(self.is_sell, 1),
+            int_to_bytes(self.maker_fee_ratio, 1),
+            int_to_bytes(self.taker_fee_ratio, 1),
+            packed_amount_checked(self.amount),
+        ])
+
+    def dict(self):
+        return {
+            "accountId": self.account_id,
+            "subAccountId": self.sub_account_id,
+            "slotId": self.slot,
+            "nonce": self.nonce,
+            "baseTokenId": self.base_token.id,
+            "quoteTokenId": self.quote_token.id,
+            "amount": str(self.amount),
+            "price": str(self.price),
+            "isSell": self.is_sell,
+            "feeRatio1": self.maker_fee_ratio,
+            "feeRatio2": self.taker_fee_ratio,
+            "signature": self.signature.dict()
+        }
 
 
 class EncodedTx(abc.ABC):
@@ -446,6 +494,7 @@ class Transfer(EncodedTx):
 
     def tx_hash(self) -> str:
         return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
+
 
 # @dataclass
 # class Withdraw(EncodedTx):

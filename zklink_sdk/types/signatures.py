@@ -56,3 +56,29 @@ class TxSignature:
             "pubKey":    self.public_key,
             "signature": self.signature
         }
+
+
+@dataclass
+class OrderSignature:
+    public_key: str
+    signature: str
+
+    @classmethod
+    def from_dict(cls, json: dict):
+        """
+        Only the difference from __init__ is that values are already in hex format
+        """
+        obj = cls(public_key=b"", signature=b"")
+        obj.public_key = json["pubKey"]
+        obj.signature = json["signature"]
+        return obj
+
+    def __init__(self, public_key: bytes, signature: bytes):
+        self.public_key = public_key.hex()
+        self.signature = signature.hex()
+
+    def dict(self):
+        return {
+            "pubKey":    self.public_key,
+            "signature": self.signature
+        }

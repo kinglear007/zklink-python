@@ -5,10 +5,15 @@ AMOUNT_EXPONENT_BIT_WIDTH = 5
 AMOUNT_MANTISSA_BIT_WIDTH = 35
 FEE_EXPONENT_BIT_WIDTH = 5
 FEE_MANTISSA_BIT_WIDTH = 11
-MAX_NUMBER_OF_ACCOUNTS = 2 ** 24
-MAX_NUMBER_OF_CHAINS = 2 ** 8
-MAX_NUMBER_OF_SUB_ACCOUNTS = 2 ** 8
-MAX_NUMBER_OF_TOKENS = 2 ** 32 - 1
+MAX_NUMBER_OF_ACCOUNTS = 2 ** 24 - 1
+MAX_NUMBER_OF_CHAINS = 2 ** 8 - 1
+MAX_NUMBER_OF_SUB_ACCOUNTS = 2 ** 8 - 1
+MAX_NUMBER_OF_SLOTS = 2 ** 13 - 1
+MAX_NUMBER_OF_TOKENS = 2 ** 16 - 1
+
+MAX_ORDER_NONCE = 2 ** 24 - 1
+MAX_NONCE = 2 ** 32 - 1
+MAX_TIMESTAMP = 2 ** 32 - 1
 
 
 class SerializationError(Exception):
@@ -218,6 +223,8 @@ def packed_amount_checked(amount: int):
 def serialize_nonce(nonce: int):
     if nonce < 0:
         raise WrongValueError
+    if nonce > MAX_NONCE:
+        raise WrongValueError
     return int_to_bytes(nonce, 4)
 
 
@@ -229,6 +236,8 @@ def serialize_nonce(nonce: int):
 
 def serialize_timestamp(timestamp: int):
     if timestamp < 0:
+        raise WrongValueError
+    if timestamp > MAX_TIMESTAMP:
         raise WrongValueError
     return int_to_bytes(timestamp, 4)
 
@@ -270,6 +279,22 @@ def serialize_sub_account_id(sub_account_id: int):
     if sub_account_id > MAX_NUMBER_OF_SUB_ACCOUNTS:
         raise WrongValueError
     return int_to_bytes(sub_account_id, 1)
+
+
+def serialize_slot_id(slot_id: int):
+    if slot_id < 0:
+        raise WrongValueError
+    if slot_id > MAX_NUMBER_OF_SLOTS:
+        raise WrongValueError
+    return int_to_bytes(slot_id, 2)
+
+
+def serialize_order_nonce(order_nonce: int):
+    if order_nonce < 0:
+        raise WrongValueError
+    if order_nonce > MAX_ORDER_NONCE:
+        raise WrongValueError
+    return int_to_bytes(order_nonce, 3)
 
 
 def remove_address_prefix(address: str) -> str:
