@@ -71,7 +71,6 @@ class ZkLinkSignerTest(TestCase):
 
         res = "070100000001003498f456645270ee003441df82c718b56c0e666600000100110001334d0000005562552fdb"
         assert tr.encoded_message().hex() == res
-
         hash = "sync-tx:5c0dee07e26608bdc1ce7f66a6fc6eefe58012e17ef38b2f224f23b52f1deca1"
         assert tr.tx_hash() == hash
 
@@ -101,11 +100,11 @@ class ZkLinkSignerTest(TestCase):
                    quote_token=Token(id=7, address='', symbol='', decimals=18),
                    is_sell=0, taker_fee_ratio=10, maker_fee_ratio=5)
 
+        assert signer.private_key.hex() == "03619c4116463a1b9b8ff16a77ad4dd796ac4b9771913152f72be2307f6b35d8"
         res = "ff00000006010001000001000600070000000000000014d1120d7b16000000050a4a817c800a"
         assert tr.encoded_message().hex() == res
-
-        res = signer.sign_order(tr)
-        assert res.signature == '7e00ed99c8be5e7ac9d9e2e1c5bf8ed6a5e28f1c91a0891d89a0eecd57ea411acc86a9e2073486235c0941b0666d928c109802e2a971571f3a7e845fcc087e01'
+        sig = signer.sign_order(tr)
+        assert sig.signature == '7e00ed99c8be5e7ac9d9e2e1c5bf8ed6a5e28f1c91a0891d89a0eecd57ea411acc86a9e2073486235c0941b0666d928c109802e2a971571f3a7e845fcc087e01'
 
 
 def check_bytes(a, b):
