@@ -498,78 +498,78 @@ class BatchBuilder:
     #     self.nonce += 1
     #     return withdraw_nft
 
-    async def _process_transactions(self):
-        message = ""
-        trs = []
-        total_fee_map = dict()
-        for obj in self.transactions:
-            if obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.CHANGE_PUB_KEY:
-                tr = await self._process_change_pub_key(obj)
-
-                prev_value = total_fee_map.get(tr.token.symbol, Decimal(0))
-                dec_fee = tr.token.decimal_amount(tr.fee)
-                total_fee_map[tr.token.symbol] = dec_fee + prev_value
-
-                message += tr.batch_message_part()
-                trs.append(TransactionWithOptionalSignature(tr))
-            elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.TRANSFER:
-                tr = await self._process_transfer(obj)
-
-                prev_value = total_fee_map.get(tr.token.symbol, Decimal(0))
-                dec_fee = tr.token.decimal_amount(tr.fee)
-                total_fee_map[tr.token.symbol] = dec_fee + prev_value
-
-                message += tr.batch_message_part()
-                trs.append(TransactionWithOptionalSignature(tr))
-            elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.WITHDRAW:
-                tr = await self._process_withdraw(obj)
-
-                prev_value = total_fee_map.get(tr.token.symbol, Decimal(0))
-                dec_fee = tr.token.decimal_amount(tr.fee)
-                total_fee_map[tr.token.symbol] = dec_fee + prev_value
-
-                message += tr.batch_message_part()
-                trs.append(TransactionWithOptionalSignature(tr))
-            elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.FORCED_EXIT:
-                tr = await self._process_forced_exit(obj)
-
-                prev_value = total_fee_map.get(tr.token.symbol, Decimal(0))
-                dec_fee = tr.token.decimal_amount(tr.fee)
-                total_fee_map[tr.token.symbol] = dec_fee + prev_value
-
-                message += tr.batch_message_part()
-                trs.append(TransactionWithOptionalSignature(tr))
-            # elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.MINT_NFT:
-            #     tr = await self._process_mint_nft(obj)
-            #
-            #     prev_value = total_fee_map.get(tr.fee_token.symbol, Decimal(0))
-            #     dec_fee = tr.fee_token.decimal_amount(tr.fee)
-            #     total_fee_map[tr.fee_token.symbol] = dec_fee + prev_value
-            #
-            #     message += tr.batch_message_part()
-            #     trs.append(TransactionWithOptionalSignature(tr))
-            # elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.WITHDRAW_NFT:
-            #     tr = await self._process_withdraw_nft(obj)
-            #
-            #     prev_value = total_fee_map.get(tr.fee_token.symbol, Decimal(0))
-            #     dec_fee = tr.fee_token.decimal_amount(tr.fee)
-            #     total_fee_map[tr.fee_token.symbol] = dec_fee + prev_value
-            #
-            #     message += tr.batch_message_part()
-            #     trs.append(TransactionWithOptionalSignature(tr))
-            # elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.SWAP:
-            #     tr = await self._process_swap(obj)
-            #
-            #     prev_value = total_fee_map.get(tr.fee_token.symbol, Decimal(0))
-            #     dec_fee = tr.fee_token.decimal_amount(tr.fee)
-            #     total_fee_map[tr.fee_token.symbol] = dec_fee + prev_value
-            #     message += tr.batch_message_part()
-            #     trs.append(TransactionWithOptionalSignature(tr, [None,
-            #                                                      tr.orders[0].eth_signature,
-            #                                                      tr.orders[1].eth_signature]
-            #                                                 ))
-            else:
-                raise TypeError("_process_transactions is trying to process unimplemented type")
-        message += f"Nonce: {self.batch_nonce}"
-        result = dict(trans=trs, msg=message, total_fee=total_fee_map)
-        return result
+    # async def _process_transactions(self):
+    #     message = ""
+    #     trs = []
+    #     total_fee_map = dict()
+    #     for obj in self.transactions:
+    #         if obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.CHANGE_PUB_KEY:
+    #             tr = await self._process_change_pub_key(obj)
+    #
+    #             prev_value = total_fee_map.get(tr.token.symbol, Decimal(0))
+    #             dec_fee = tr.token.decimal_amount(tr.fee)
+    #             total_fee_map[tr.token.symbol] = dec_fee + prev_value
+    #
+    #             message += tr.batch_message_part()
+    #             trs.append(TransactionWithOptionalSignature(tr))
+    #         elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.TRANSFER:
+    #             tr = await self._process_transfer(obj)
+    #
+    #             prev_value = total_fee_map.get(tr.token.symbol, Decimal(0))
+    #             dec_fee = tr.token.decimal_amount(tr.fee)
+    #             total_fee_map[tr.token.symbol] = dec_fee + prev_value
+    #
+    #             message += tr.batch_message_part()
+    #             trs.append(TransactionWithOptionalSignature(tr))
+    #         elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.WITHDRAW:
+    #             tr = await self._process_withdraw(obj)
+    #
+    #             prev_value = total_fee_map.get(tr.token.symbol, Decimal(0))
+    #             dec_fee = tr.token.decimal_amount(tr.fee)
+    #             total_fee_map[tr.token.symbol] = dec_fee + prev_value
+    #
+    #             message += tr.batch_message_part()
+    #             trs.append(TransactionWithOptionalSignature(tr))
+    #         elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.FORCED_EXIT:
+    #             tr = await self._process_forced_exit(obj)
+    #
+    #             prev_value = total_fee_map.get(tr.token.symbol, Decimal(0))
+    #             dec_fee = tr.token.decimal_amount(tr.fee)
+    #             total_fee_map[tr.token.symbol] = dec_fee + prev_value
+    #
+    #             message += tr.batch_message_part()
+    #             trs.append(TransactionWithOptionalSignature(tr))
+    #         elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.MINT_NFT:
+    #             tr = await self._process_mint_nft(obj)
+    #
+    #             prev_value = total_fee_map.get(tr.fee_token.symbol, Decimal(0))
+    #             dec_fee = tr.fee_token.decimal_amount(tr.fee)
+    #             total_fee_map[tr.fee_token.symbol] = dec_fee + prev_value
+    #
+    #             message += tr.batch_message_part()
+    #             trs.append(TransactionWithOptionalSignature(tr))
+    #         elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.WITHDRAW_NFT:
+    #             tr = await self._process_withdraw_nft(obj)
+    #
+    #             prev_value = total_fee_map.get(tr.fee_token.symbol, Decimal(0))
+    #             dec_fee = tr.fee_token.decimal_amount(tr.fee)
+    #             total_fee_map[tr.fee_token.symbol] = dec_fee + prev_value
+    #
+    #             message += tr.batch_message_part()
+    #             trs.append(TransactionWithOptionalSignature(tr))
+    #         elif obj[self.ENCODED_TRANSACTION_TYPE] == EncodedTxType.SWAP:
+    #             tr = await self._process_swap(obj)
+    #
+    #             prev_value = total_fee_map.get(tr.fee_token.symbol, Decimal(0))
+    #             dec_fee = tr.fee_token.decimal_amount(tr.fee)
+    #             total_fee_map[tr.fee_token.symbol] = dec_fee + prev_value
+    #             message += tr.batch_message_part()
+    #             trs.append(TransactionWithOptionalSignature(tr, [None,
+    #                                                              tr.orders[0].eth_signature,
+    #                                                              tr.orders[1].eth_signature]
+    #                                                         ))
+    #         else:
+    #             raise TypeError("_process_transactions is trying to process unimplemented type")
+    #     message += f"Nonce: {self.batch_nonce}"
+    #     result = dict(trans=trs, msg=message, total_fee=total_fee_map)
+    #     return result

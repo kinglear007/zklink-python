@@ -210,18 +210,6 @@ class ChangePubKey(EncodedTx):
 
     signature: Optional[TxSignature] = None
 
-    def human_readable_message(self) -> str:
-        message = f"Set signing key: {self.new_pk_hash.replace('sync:', '').lower()}"
-        if self.fee:
-            message += f"\nFee: {self.fee} {self.fee_token.symbol}"
-        return message
-
-    def batch_message_part(self) -> str:
-        message = f"Set signing key: {self.new_pk_hash.replace('sync:', '').lower()}\n"
-        if self.fee:
-            message += f"Fee: {self.fee_token.decimal_str_amount(self.fee)} {self.fee_token.symbol}\n"
-        return message
-
     def encoded_message(self) -> bytes:
         return b"".join([
             int_to_bytes(self.tx_type(), 1),
@@ -297,18 +285,11 @@ class Transfer(EncodedTx):
     def human_readable_message(self) -> str:
         msg = ""
         if self.amount != 0:
-            message = ""
+            msg += f"Transfer {self.token.decimal_str_amount(self.amount)} {self.token.symbol} to: {self.to_address.lower()}\n"
         if self.fee != 0:
-            message = ""
-        return msg
+            msg += f"Fee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\n"
 
-    def batch_message_part(self) -> str:
-        msg = ""
-        if self.amount != 0:
-            message = ""
-        if self.fee != 0:
-            message = ""
-        return msg
+        return msg + f"Nonce: {self.nonce}"
 
     def encoded_message(self) -> bytes:
         return b"".join([
@@ -366,18 +347,10 @@ class Withdraw(EncodedTx):
     def human_readable_message(self) -> str:
         msg = ""
         if self.amount != 0:
-            message = ""
+            msg += f"Withdraw {self.l2_source_token.decimal_str_amount(self.amount)} {self.l2_source_token.symbol} to: {self.to_address.lower()}\n"
         if self.fee != 0:
-            message = ""
-        return msg
-
-    def batch_message_part(self) -> str:
-        msg = ""
-        if self.amount != 0:
-            message = ""
-        if self.fee != 0:
-            message = ""
-        return msg
+            msg += f"Fee: {self.l2_source_token.decimal_str_amount(self.fee)} {self.l2_source_token.symbol}\n"
+        return msg + f"Nonce: {self.nonce}"
 
     def encoded_message(self) -> bytes:
         return b"".join([
@@ -454,12 +427,12 @@ class ForcedExit(EncodedTx):
         ])
 
     def human_readable_message(self) -> str:
-        message = ""
-        return message
+        msg = ""
+        msg += f"ForcedExit {self.l2_source_token.symbol} to: {self.target.lower()}\n"
+        if self.fee != 0:
+            msg += f"Fee: {self.fee_token.decimal_str_amount(self.fee)} {self.fee_token.symbol}\n"
 
-    def batch_message_part(self) -> str:
-        message = ""
-        return message
+        return msg + f"Nonce: {self.nonce}"
 
     def dict(self):
         return {
@@ -509,14 +482,6 @@ class OrderMatching(EncodedTx):
             int_to_bytes(self.expect_base_amount, 16),
             int_to_bytes(self.expect_quote_amount, 16)
         ])
-
-    def human_readable_message(self) -> str:
-        message = ""
-        return message
-
-    def batch_message_part(self) -> str:
-        message = ""
-        return message
 
     def dict(self):
         return {
