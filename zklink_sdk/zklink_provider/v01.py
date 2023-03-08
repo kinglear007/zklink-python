@@ -103,6 +103,6 @@ class ZkLinkProviderV01(ZkLinkProviderInterface):
     #     data = await self.provider.request('get_token_price', [token.symbol])
     #     return Decimal(data)
 
-    async def toggle_2fa(self, toggle2fa: Toggle2FA) -> bool:
-        data = await self.provider.request('toggle_2fa', [toggle2fa.dict()])
-        return 'success' in data and data['success']
+    # async def toggle_2fa(self, toggle2fa: Toggle2FA) -> bool:
+    #     data = await self.provider.request('toggle_2fa', [toggle2fa.dict()])
+    #     return 'success' in data and data['success']

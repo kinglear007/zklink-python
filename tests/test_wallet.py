@@ -188,25 +188,25 @@ class TestWallet(IsolatedAsyncioTestCase):
     async def test_is_signing_key_set(self):
         assert await self.wallet.is_signing_key_set()
 
-    async def test_toggle_2fa(self):
-        """
-        Relate to the server-side code it must be Owned type if enable_2fa is passed
-        let new_type = if toggle_2fa.enable {
-            EthAccountType::Owned
-        } else {
-            EthAccountType::No2FA
-        };
-        """
-        result = await self.wallet.enable_2fa()
-        self.assertTrue(result)
-        account_state = await self.wallet.get_account_state()
-        self.assertEqual(AccountTypes.OWNED, account_state.account_type)
-
-        pub_key_hash = self.wallet.zk_signer.pubkey_hash_str()
-        result = await self.wallet.disable_2fa(pub_key_hash)
-        self.assertTrue(result)
-        account_state = await self.wallet.get_account_state()
-        self.assertEqual(AccountTypes.NO_2FA, account_state.account_type)
+    # async def test_toggle_2fa(self):
+    #     """
+    #     Relate to the server-side code it must be Owned type if enable_2fa is passed
+    #     let new_type = if toggle_2fa.enable {
+    #         EthAccountType::Owned
+    #     } else {
+    #         EthAccountType::No2FA
+    #     };
+    #     """
+    #     result = await self.wallet.enable_2fa()
+    #     self.assertTrue(result)
+    #     account_state = await self.wallet.get_account_state()
+    #     self.assertEqual(AccountTypes.OWNED, account_state.account_type)
+    #
+    #     pub_key_hash = self.wallet.zk_signer.pubkey_hash_str()
+    #     result = await self.wallet.disable_2fa(pub_key_hash)
+    #     self.assertTrue(result)
+    #     account_state = await self.wallet.get_account_state()
+    #     self.assertEqual(AccountTypes.NO_2FA, account_state.account_type)
 
 
 class TestEthereumProvider(IsolatedAsyncioTestCase):

@@ -336,34 +336,34 @@ class Wallet:
             raise TokenNotFoundError
         return resolved_token
 
-    async def enable_2fa(self) -> bool:
-        mil_seconds = int(time.time() * 1000)
-        msg = get_toggle_message(True, mil_seconds)
-        eth_sig = self.eth_signer.sign(msg.encode())
-        account_id = await self.get_account_id()
-        toggle = Toggle2FA(True,
-                           account_id,
-                           mil_seconds,
-                           eth_sig,
-                           None
-                           )
-        return await self.zk_provider.toggle_2fa(toggle)
+    # async def enable_2fa(self) -> bool:
+    #     mil_seconds = int(time.time() * 1000)
+    #     msg = get_toggle_message(True, mil_seconds)
+    #     eth_sig = self.eth_signer.sign(msg.encode())
+    #     account_id = await self.get_account_id()
+    #     toggle = Toggle2FA(True,
+    #                        account_id,
+    #                        mil_seconds,
+    #                        eth_sig,
+    #                        None
+    #                        )
+    #     return await self.zk_provider.toggle_2fa(toggle)
 
-    async def disable_2fa(self, pub_key_hash: Optional[str]) -> bool:
-        mil_seconds = int(time.time() * 1000)
-        if pub_key_hash is None:
-            msg = get_toggle_message(False, mil_seconds)
-        else:
-            msg = get_toggle_message_with_pub(False, mil_seconds, pub_key_hash)
-        eth_sig = self.eth_signer.sign(msg.encode())
-        account_id = await self.get_account_id()
-        toggle = Toggle2FA(False,
-                           account_id,
-                           mil_seconds,
-                           eth_sig,
-                           pub_key_hash)
-        return await self.zk_provider.toggle_2fa(toggle)
+    # async def disable_2fa(self, pub_key_hash: Optional[str]) -> bool:
+    #     mil_seconds = int(time.time() * 1000)
+    #     if pub_key_hash is None:
+    #         msg = get_toggle_message(False, mil_seconds)
+    #     else:
+    #         msg = get_toggle_message_with_pub(False, mil_seconds, pub_key_hash)
+    #     eth_sig = self.eth_signer.sign(msg.encode())
+    #     account_id = await self.get_account_id()
+    #     toggle = Toggle2FA(False,
+    #                        account_id,
+    #                        mil_seconds,
+    #                        eth_sig,
+    #                        pub_key_hash)
+    #     return await self.zk_provider.toggle_2fa(toggle)
 
-    async def disable_2fa_with_pub_key(self):
-        pub_key_hash = self.zk_signer.pubkey_hash_str()
-        return await self.disable_2fa(pub_key_hash)
+    # async def disable_2fa_with_pub_key(self):
+    #     pub_key_hash = self.zk_signer.pubkey_hash_str()
+    #     return await self.disable_2fa(pub_key_hash)
