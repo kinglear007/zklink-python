@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import List, Optional, Union
 from web3 import Web3
 
-from zklink_sdk.types import (AccountState, ContractAddress, EncodedTx, Fee, Token,
+from zklink_sdk.types import (AccountState, ContractAddress, ContractAddresses, EncodedTx, Fee, Token,
                               TokenLike, Tokens, TransactionDetails, TransactionWithSignature,
                               TransactionWithOptionalSignature,
                               TxEthSignature, SubmitSignature)
@@ -28,18 +28,30 @@ class ZkLinkProviderV01(ZkLinkProviderInterface):
         data = await self.provider.request("getSupportTokens", None)
         tokens = []
         for token in data.values():
-            for chain in token['chains']:
-                t = Token(address=Web3.toChecksumAddress(chain['address']),
-                          chain_id=chain['chainId'],
-                          decimals=chain['decimals'],
-                          id=token['id'],
-                          symbol=token['symbol'])
-                tokens.append(t)
+            if len(token['chains']) != 0:
+                for chain in token['chains']:
+                    t = Token(address=Web3.toChecksumAddress(chain['address']),
+                              chain_id=chain['chainId'],
+                              decimals=chain['decimals'],
+                              id=token['id'],
+                              symbol=token['symbol'])
+                    tokens.append(t)
+            else:
+                tokens.append(Token(address='',
+                                    chain_id=-1,
+                                    decimals=-1,
+                                    id=token['id'],
+                                    symbol=token['symbol']))
         return Tokens(tokens=tokens)
 
-    async def get_contract_address(self) -> ContractAddress:
-        data = await self.provider.request("contract_address", None)
-        return ContractAddress(**data)
+    async def get_support_chains(self) -> ContractAddresses:
+        data = await self.provider.request("getSupportChains", None)
+        addresses = [ContractAddress(
+            chain_id=chain['chainId'],
+            layer1_chain_id=chain['layerOneChainId'],
+            main_contract=chain['mainContract'],
+            gov_contract='') for chain in data]
+        return ContractAddresses(addresses=addresses)
 
     async def get_state(self, address: str) -> AccountState:
         data = await self.provider.request("account_info", [address])

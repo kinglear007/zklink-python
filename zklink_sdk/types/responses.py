@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from enum import Enum
 from decimal import Decimal
 from zklink_sdk.types.transactions import Token
@@ -67,11 +67,31 @@ class Fee(BaseModel):
 
 
 class ContractAddress(BaseModel):
+    chain_id: int
+    layer1_chain_id: int
     main_contract: str
     gov_contract: str
 
     class Config:
         alias_generator = to_camel
+
+
+class ContractAddresses(BaseModel):
+    addresses: List[ContractAddress]
+
+    def find_by_address(self, main_contract: str) -> Optional[ContractAddress]:
+        found_address = [address for address in self.addresses if address.main_contract == main_contract]
+        if found_address:
+            return found_address[0]
+        else:
+            return None
+
+    def find_by_chain_id(self, chain_id: int) -> Optional[ContractAddress]:
+        found_address = [address for address in self.addresses if address.chain_id == chain_id]
+        if found_address:
+            return found_address[0]
+        else:
+            return None
 
 
 class BlockInfo(BaseModel):

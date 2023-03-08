@@ -37,7 +37,8 @@ class TestWallet(IsolatedAsyncioTestCase):
         w3 = Web3(HTTPProvider(
             endpoint_uri="https://rinkeby.infura.io/v3/bcf42e619a704151a1b0d95a35cb2e62"))
         provider = ZkLinkProviderV01(provider=HttpJsonRPCTransport(network=testnet))
-        address = await provider.get_contract_address()
+        addresses = await provider.get_support_chains()
+        address = addresses.find_by_chain_id(1)
         zklink = ZkLink(account=account, web3=w3, zklink_contract_address=address.main_contract)
         ethereum_provider = EthereumProvider(w3, zklink)
         signer = ZkLinkSigner.from_account(account, self.library)
@@ -107,7 +108,7 @@ class TestWallet(IsolatedAsyncioTestCase):
 
     async def test_get_tokens(self):
         tokens = await self.wallet.zk_provider.get_support_tokens()
-        assert tokens.find_by_symbol("ETH")
+        assert tokens.find_by_symbol("wETH", 1)
 
     async def test_is_signing_key_set(self):
         assert await self.wallet.is_signing_key_set()
@@ -123,7 +124,8 @@ class TestEthereumProvider(IsolatedAsyncioTestCase):
         w3 = Web3(HTTPProvider(
             endpoint_uri="https://rinkeby.infura.io/v3/bcf42e619a704151a1b0d95a35cb2e62"))
         provider = ZkLinkProviderV01(provider=HttpJsonRPCTransport(network=testnet))
-        address = await provider.get_contract_address()
+        addresses = await provider.get_support_chains()
+        address = addresses.find_by_chain_id(1)
         self.zklink = ZkLink(account=self.account, web3=w3,
                              zklink_contract_address=address.main_contract)
         self.ethereum_provider = EthereumProvider(w3, self.zklink)

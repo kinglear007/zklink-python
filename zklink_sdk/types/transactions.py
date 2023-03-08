@@ -20,7 +20,6 @@ from zklink_sdk.types.auth_types import ChangePubKeyCREATE2, ChangePubKeyEcdsa
 
 DEFAULT_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"
 
-TokenLike = Union[str, int]
 
 TRANSACTION_VERSION = 0x01
 
@@ -97,30 +96,19 @@ class Tokens(BaseModel):
         else:
             return None
 
-    def find_by_id(self, token_id: int) -> Optional[Token]:
-        found_token = [token for token in self.tokens if token.id == token_id]
+    def find_by_id(self, token_id: int, chain_id: int) -> Optional[Token]:
+        found_token = [token for token in self.tokens if token.id == token_id and token.chain_id == chain_id]
         if found_token:
             return found_token[0]
         else:
             return None
 
-    def find_by_symbol(self, symbol: str) -> Optional[Token]:
-        found_token = [token for token in self.tokens if token.symbol == symbol]
+    def find_by_symbol(self, symbol: str, chain_id: int) -> Optional[Token]:
+        found_token = [token for token in self.tokens if token.symbol == symbol and token.chain_id == chain_id]
         if found_token:
             return found_token[0]
         else:
             return None
-
-    def find(self, token: TokenLike) -> Optional[Token]:
-        result = None
-        if isinstance(token, int):
-            result = self.find_by_id(token)
-
-        if isinstance(token, str):
-            result = self.find_by_address(address=token)
-            if result is None:
-                result = self.find_by_symbol(symbol=token)
-        return result
 
 
 class Order(BaseModel):
