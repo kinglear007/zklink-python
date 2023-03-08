@@ -2,6 +2,7 @@ import os
 from unittest import TestCase
 
 from zklink_sdk import ZkLinkLibrary
+from zklink_sdk.types.transactions import Order, Token
 
 
 class TestZkLinkLibrary(TestCase):
@@ -38,5 +39,17 @@ class TestZkLinkLibrary(TestCase):
         assert signature.hex() == "7e00ed99c8be5e7ac9d9e2e1c5bf8ed6a5e28f1c91a0891d89a0eecd57ea411acc86a9e2073486235c0941b0666d928c109802e2a971571f3a7e845fcc087e01"
 
     def test_hash_orders(self):
-        # TODO
-        pass
+        maker_order = Order(account_id=6, price=1500000000000000000, amount=100000000000000000000,
+                            sub_account_id=1, slot=1, nonce=1,
+                            base_token=Token(id=32, address='', symbol='', decimals=18),
+                            quote_token=Token(id=1, address='', symbol='', decimals=18),
+                            is_sell=0, taker_fee_ratio=10, maker_fee_ratio=5)
+        taker_order = Order(account_id=6, price=1500000000000000000, amount=1000000000000000000,
+                            sub_account_id=1, slot=3, nonce=0,
+                            base_token=Token(id=32, address='', symbol='', decimals=18),
+                            quote_token=Token(id=1, address='', symbol='', decimals=18),
+                            is_sell=1, taker_fee_ratio=10, maker_fee_ratio=5)
+        orders = maker_order.encoded_message() + taker_order.encoded_message()
+        hash = self.library.hash_orders(orders)
+
+        assert hash.hex() == "83be69c82b2c56df952594436bd024ce85ed2eaee63dadb5b3a3e1aec62388"

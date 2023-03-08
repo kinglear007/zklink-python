@@ -2,7 +2,6 @@ import ctypes
 from ctypes import (Structure, c_ubyte, cdll)
 import os
 from typing import Optional
-from .types.transactions import Order
 
 PRIVATE_KEY_LEN = 32
 PUBLIC_KEY_LEN = 32
@@ -46,7 +45,7 @@ class ZksOrdersHash(Structure):
 
 class ZksOrders(Structure):
     _fields_ = [
-        ("data", c_ubyte * (ORDER_LEN * 2)),
+        ("data", c_ubyte * RESCUE_HASH_LEN),
     ]
 
 
@@ -85,8 +84,7 @@ class ZkLinkLibrary:
         self.lib.zks_crypto_sign_musig(private_key_ptr, message, len(message), signature)
         return bytes(signature.contents.data)
 
-    def hash_orders(self, maker_order: Order, taker_order: Order):
-        orders = maker_order.encoded_message() + taker_order.encoded_message()
+    def hash_orders(self, orders: bytes):
         assert len(orders) == ORDER_LEN * 2
         padding_num = RESCUE_HASH_LEN - ORDER_LEN * 2
         orders = orders + b'\x00' * padding_num

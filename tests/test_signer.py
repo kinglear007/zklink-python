@@ -91,7 +91,7 @@ class ZkLinkSignerTest(TestCase):
         res = signer.sign_tx(tr)
         assert res.signature == '0ffe0eaef99542f1476c88cb4a0ec0de04382ae9db23070ba299d4dfe9d6a3939356fe614775d837d34c6e5ac3074ecf8ee3ccafab53f8f3d521900930f7af04'
 
-    def test_order(self):
+    def test_sign_order(self):
         account = Account.from_key("336b38ea188a4da28a9a3232a21359a51f6b3c5fdd844c122dd6d76d6605a4ec")
         signer = ZkLinkSigner.from_account(account, self.library)
         tr = Order(account_id=6, price=1500000000000000000, amount=100000000000000000000,
