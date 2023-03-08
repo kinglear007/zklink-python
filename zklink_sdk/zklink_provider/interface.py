@@ -5,7 +5,7 @@ from zklink_sdk.transport import JsonRPCTransport
 from zklink_sdk.types import (AccountState, ContractAddress, EncodedTx, EthOpInfo, Fee, Token,
                               TokenLike, Tokens, TransactionDetails, TransactionWithSignature,
                               TransactionWithOptionalSignature,
-                              TxEthSignature, Toggle2FA, )
+                              TxEthSignature, Toggle2FA, SubmitSignature)
 from zklink_sdk.zklink_provider.types import FeeTxType
 from zklink_sdk.zklink_provider.transaction import Transaction
 
@@ -17,8 +17,8 @@ class ZkLinkProviderInterface(ABC):
         self.provider = provider
 
     @abstractmethod
-    async def submit_tx(self, tx: EncodedTx, signature: Union[Optional[TxEthSignature], List[Optional[TxEthSignature]]],
-                        fast_processing: bool = False) -> Transaction:
+    async def submit_tx(self, tx: EncodedTx, signature: Optional[TxEthSignature],
+                        submitter_signature: Optional[SubmitSignature] = None) -> Transaction:
         raise NotImplementedError
 
     @abstractmethod
@@ -37,9 +37,9 @@ class ZkLinkProviderInterface(ABC):
     #                                          signature: TxEthSignature) -> List[Transaction]:
     #     raise NotImplementedError
 
-    # @abstractmethod
-    # async def get_contract_address(self) -> ContractAddress:
-    #     raise NotImplementedError
+    @abstractmethod
+    async def get_contract_address(self) -> ContractAddress:
+        raise NotImplementedError
 
     @abstractmethod
     async def get_state(self, address: str) -> AccountState:

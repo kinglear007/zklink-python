@@ -82,3 +82,11 @@ class OrderSignature:
             "pubKey": self.public_key,
             "signature": self.signature
         }
+
+
+@dataclass
+class SubmitSignature:
+    signature: str
+
+    def __init__(self, signature: bytes):
+        self.signature = signature.hex()

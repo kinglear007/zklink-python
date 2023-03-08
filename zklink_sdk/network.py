@@ -9,3 +9,4 @@ class Network:
 
 
 testnet = Network(zklink_url="https://aws-gw-v2.zk.link/rpc")
+devnet = Network(zklink_url="https://dev-gw-v1.zk.link/")

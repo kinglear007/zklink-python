@@ -6,7 +6,7 @@ from web3 import Web3
 from zklink_sdk.types import (AccountState, ContractAddress, EncodedTx, EthOpInfo, Fee, Token,
                               TokenLike, Tokens, TransactionDetails, TransactionWithSignature,
                               TransactionWithOptionalSignature,
-                              TxEthSignature, Toggle2FA, )
+                              TxEthSignature, Toggle2FA, SubmitSignature)
 from zklink_sdk.zklink_provider.error import AccountDoesNotExist
 from zklink_sdk.zklink_provider.interface import ZkLinkProviderInterface
 from zklink_sdk.zklink_provider.types import FeeTxType
@@ -16,14 +16,12 @@ __all__ = ['ZkLinkProviderV01']
 
 
 class ZkLinkProviderV01(ZkLinkProviderInterface):
-    async def submit_tx(self, tx: EncodedTx, signature: Union[Optional[TxEthSignature], List[Optional[TxEthSignature]]],
-                        fast_processing: bool = False) -> Transaction:
-        if isinstance(signature, List):
-            signature = [s.dict() if s is not None else None for s in signature]
-        else:
-            signature = signature.dict() if signature is not None else None
+    async def submit_tx(self, tx: EncodedTx, signature: Optional[TxEthSignature],
+                        submitter_signature: Optional[SubmitSignature] = None) -> Transaction:
+        signature = signature.dict() if signature is not None else None
+        submitter_signature = submitter_signature.signature if submitter_signature is not None else None
         trans_id = await self.provider.request("tx_submit",
-                                               [tx.dict(), signature, fast_processing])
+                                               [tx.dict(), signature, submitter_signature])
         return Transaction.build_transaction(self, trans_id)
 
     async def get_tokens(self) -> Tokens:
@@ -55,9 +53,9 @@ class ZkLinkProviderV01(ZkLinkProviderInterface):
     #     trans_ids: List[str] = await self.provider.request("submit_txs_batch", params)
     #     return [Transaction.build_transaction(self, trans_id) for trans_id in trans_ids]
 
-    # async def get_contract_address(self) -> ContractAddress:
-    #     data = await self.provider.request("contract_address", None)
-    #     return ContractAddress(**data)
+    async def get_contract_address(self) -> ContractAddress:
+        data = await self.provider.request("contract_address", None)
+        return ContractAddress(**data)
 
     async def get_state(self, address: str) -> AccountState:
         data = await self.provider.request("account_info", [address])

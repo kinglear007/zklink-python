@@ -8,7 +8,7 @@ from zklink_sdk.ethereum_signer import EthereumSignerInterface
 from zklink_sdk.types import (ChangePubKey, ChangePubKeyCREATE2, ChangePubKeyEcdsa,
                               ChangePubKeyTypes, EncodedTx, ForcedExit, Token, TokenLike,
                               Tokens, TransactionWithSignature, Transfer, TxEthSignature,
-                              Withdraw, Order, RatioType,
+                              Withdraw, Order, RatioType, SubmitSignature,
                               token_ratio_to_wei_ratio, get_toggle_message, get_toggle_message_with_pub, Toggle2FA)
 from zklink_sdk.zklink_provider import FeeTxType, ZkLinkProviderInterface
 from zklink_sdk.zklink_signer import ZkLinkSigner
@@ -48,9 +48,9 @@ class Wallet:
         return self.account_id
 
     async def send_signed_transaction(self, tx: EncodedTx,
-                                      eth_signature: Union[Optional[TxEthSignature], List[Optional[TxEthSignature]]],
-                                      fast_processing: bool = False) -> Transaction:
-        return await self.zk_provider.submit_tx(tx, eth_signature, fast_processing)
+                                      eth_signature: Optional[TxEthSignature],
+                                      submitter_signature: Optional[SubmitSignature] = None) -> Transaction:
+        return await self.zk_provider.submit_tx(tx, eth_signature, submitter_signature)
 
     # async def send_txs_batch(self, transactions: List[TransactionWithSignature],
     #                          signatures: Optional[
