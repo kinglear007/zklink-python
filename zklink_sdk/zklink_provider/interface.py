@@ -22,7 +22,7 @@ class ZkLinkProviderInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_tokens(self) -> Tokens:
+    async def get_support_tokens(self) -> Tokens:
         raise NotImplementedError
 
     @abstractmethod

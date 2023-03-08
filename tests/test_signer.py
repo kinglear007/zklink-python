@@ -25,7 +25,7 @@ class ZkLinkSignerTest(TestCase):
 
     def test_change_pubkey_bytes(self):
         tr = ChangePubKey(chain_id=1,
-                          fee_token=Token(id=1, address='', symbol='', decimals=18),
+                          fee_token=Token(id=1, chain_id=0, address='', symbol='', decimals=18),
                           fee=0, nonce=0, account_id=2, sub_account_id=1, timestamp=1654776640,
                           new_pk_hash='sync:511494921e9aec60dfd65ce125dec96fe7c07133')
 
@@ -37,7 +37,7 @@ class ZkLinkSignerTest(TestCase):
     def test_transfer_bytes(self):
         tr = Transfer(from_sub_account_id=1, to_sub_account_id=1,
                       to_address="0xdddd547fA95AdE4EF0C8B517dA7889A5F110eA38",
-                      token=Token(id=42, address='', symbol='', decimals=18),
+                      token=Token(id=42, chain_id=0, address='', symbol='', decimals=18),
                       amount=1000000000000000000, fee=238000000000000,
                       nonce=3, timestamp=1670830922, account_id=15)
 
@@ -48,8 +48,8 @@ class ZkLinkSignerTest(TestCase):
 
     def test_withdraw_bytes(self):
         tr = Withdraw(to_address="0x3498F456645270eE003441df82C718b56c0e6666",
-                      l1_target_token=Token(id=18, address='', symbol='', decimals=18),
-                      l2_source_token=Token(id=1, address='', symbol='', decimals=18),
+                      l1_target_token=Token(id=18, chain_id=0, address='', symbol='', decimals=18),
+                      l2_source_token=Token(id=1, chain_id=0, address='', symbol='', decimals=18),
                       amount=100000000000000000000, fee=0, nonce=1, fast_withdraw=0,
                       withdraw_fee_ratio=50, account_id=16, sub_account_id=1, to_chain_id=1,
                       timestamp=1667963443)
@@ -63,9 +63,9 @@ class ZkLinkSignerTest(TestCase):
         tr = ForcedExit(
             to_chain_id=1, initiator_account_id=1, initiator_sub_account_id=0,
             target="0x3498F456645270eE003441df82C718b56c0e6666", target_sub_account_id=0,
-            l2_source_token=Token(id=1, address='', symbol='', decimals=18),
-            l1_target_token=Token(id=17, address='', symbol='', decimals=18),
-            fee_token=Token(id=1, address='', symbol='', decimals=18),
+            l2_source_token=Token(id=1, chain_id=0, address='', symbol='', decimals=18),
+            l1_target_token=Token(id=17, chain_id=0, address='', symbol='', decimals=18),
+            fee_token=Token(id=1, chain_id=0, address='', symbol='', decimals=18),
             fee=4100000000000000, nonce=85, timestamp=1649749979
         )
 
@@ -85,7 +85,7 @@ class ZkLinkSignerTest(TestCase):
         signer = ZkLinkSigner.from_account(account, self.library)
         tr = Transfer(from_sub_account_id=1, to_sub_account_id=1,
                       to_address="0xdddd547fA95AdE4EF0C8B517dA7889A5F110eA38",
-                      token=Token(id=42, address='', symbol='', decimals=18),
+                      token=Token(id=42, chain_id=0, address='', symbol='', decimals=18),
                       amount=1000000000000000000, fee=238000000000000,
                       nonce=3, timestamp=1670830922, account_id=15)
 
@@ -97,8 +97,8 @@ class ZkLinkSignerTest(TestCase):
         signer = ZkLinkSigner.from_account(account, self.library)
         tr = Order(account_id=6, price=1500000000000000000, amount=100000000000000000000,
                    sub_account_id=1, slot=1, nonce=1,
-                   base_token=Token(id=6, address='', symbol='', decimals=18),
-                   quote_token=Token(id=7, address='', symbol='', decimals=18),
+                   base_token=Token(id=6, chain_id=0, address='', symbol='', decimals=18),
+                   quote_token=Token(id=7, chain_id=0, address='', symbol='', decimals=18),
                    is_sell=0, taker_fee_ratio=10, maker_fee_ratio=5)
 
         assert signer.private_key.hex() == "03619c4116463a1b9b8ff16a77ad4dd796ac4b9771913152f72be2307f6b35d8"
@@ -112,17 +112,17 @@ class ZkLinkSignerTest(TestCase):
         signer = ZkLinkSigner.from_account(account, self.library)
         maker = Order(account_id=6, price=1500000000000000000, amount=100000000000000000000,
                       sub_account_id=1, slot=1, nonce=1,
-                      base_token=Token(id=32, address='', symbol='', decimals=18),
-                      quote_token=Token(id=1, address='', symbol='', decimals=18),
+                      base_token=Token(id=32, chain_id=0, address='', symbol='', decimals=18),
+                      quote_token=Token(id=1, chain_id=0, address='', symbol='', decimals=18),
                       is_sell=0, taker_fee_ratio=10, maker_fee_ratio=5)
         taker = Order(account_id=6, price=1500000000000000000, amount=1000000000000000000,
                       sub_account_id=1, slot=3, nonce=0,
-                      base_token=Token(id=32, address='', symbol='', decimals=18),
-                      quote_token=Token(id=1, address='', symbol='', decimals=18),
+                      base_token=Token(id=32, chain_id=0, address='', symbol='', decimals=18),
+                      quote_token=Token(id=1, chain_id=0, address='', symbol='', decimals=18),
                       is_sell=1, taker_fee_ratio=10, maker_fee_ratio=5)
         tr = OrderMatching(account_id=6, sub_account_id=1, taker=taker,
                            maker=maker, fee=0,
-                           fee_token=Token(id=1, address='', symbol='', decimals=18),
+                           fee_token=Token(id=1, chain_id=0, address='', symbol='', decimals=18),
                            expect_base_amount=1000000000000000000,
                            expect_quote_amount=1500000000000000000)
 

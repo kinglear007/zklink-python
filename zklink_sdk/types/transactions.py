@@ -45,10 +45,11 @@ class Token(BaseModel):
     id: int
     symbol: str
     decimals: int
+    chain_id: int
 
     @classmethod
     def eth(cls):
-        return cls(id=0,
+        return cls(id=0, chain_id=0,
                    address=DEFAULT_TOKEN_ADDRESS,
                    symbol="ETH",
                    decimals=18)

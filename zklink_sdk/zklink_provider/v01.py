@@ -24,13 +24,17 @@ class ZkLinkProviderV01(ZkLinkProviderInterface):
                                                [tx.dict(), signature, submitter_signature])
         return Transaction.build_transaction(self, trans_id)
 
-    async def get_tokens(self) -> Tokens:
-        data = await self.provider.request("tokens", None)
-        tokens = [Token(address=Web3.toChecksumAddress(token['address']),
-                        id=token['id'],
-                        symbol=token['symbol'],
-                        decimals=token['decimals']
-                        ) for token in data.values()]
+    async def get_support_tokens(self) -> Tokens:
+        data = await self.provider.request("getSupportTokens", None)
+        tokens = []
+        for token in data.values():
+            for chain in token['chains']:
+                t = Token(address=Web3.toChecksumAddress(chain['address']),
+                          chain_id=chain['chainId'],
+                          decimals=chain['decimals'],
+                          id=token['id'],
+                          symbol=token['symbol'])
+                tokens.append(t)
         return Tokens(tokens=tokens)
 
     async def get_contract_address(self) -> ContractAddress:

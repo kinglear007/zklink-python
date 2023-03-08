@@ -27,6 +27,7 @@ class TestWallet(IsolatedAsyncioTestCase):
     ]
     receiver_address = "0x21dDF51966f2A66D03998B0956fe59da1b3a179F"
     forced_exit_account_address = "0x21dDF51966f2A66D03998B0956fe59da1b3aFFFE"
+
     # nft_transfer_account_address = "0x995a8b7f96cb837533b79775b6209696d51f435c"
 
     async def get_wallet(self, private_key: str) -> Wallet:
@@ -105,7 +106,7 @@ class TestWallet(IsolatedAsyncioTestCase):
             assert False, f"test_withdraw, transaction has failed with error: {ex}"
 
     async def test_get_tokens(self):
-        tokens = await self.wallet.zk_provider.get_tokens()
+        tokens = await self.wallet.zk_provider.get_support_tokens()
         assert tokens.find_by_symbol("ETH")
 
     async def test_is_signing_key_set(self):
@@ -130,21 +131,21 @@ class TestEthereumProvider(IsolatedAsyncioTestCase):
     async def test_approve_deposit(self):
         token = Token(
             address=Web3.toChecksumAddress('0xeb8f08a975ab53e34d8a0330e0d34de942c95926'),
-            id=20, symbol='USDC',
+            id=20, chain_id=0, symbol='USDC',
             decimals=18)
         assert await self.ethereum_provider.approve_deposit(token, Decimal(1))
 
     async def test_full_exit(self):
         token = Token(
             address=Web3.toChecksumAddress('0xD2084eA2AE4bBE1424E4fe3CDE25B713632fb988'),
-            id=20, symbol='BAT',
+            id=20, chain_id=0, symbol='BAT',
             decimals=18)
         assert await self.ethereum_provider.full_exit(token, 6713)
 
     async def test_is_deposit_approved(self):
         token = Token(
             address=Web3.toChecksumAddress('0xD2084eA2AE4bBE1424E4fe3CDE25B713632fb988'),
-            id=20, symbol='BAT',
+            id=20, chain_id=0, symbol='BAT',
             decimals=18)
         assert await self.ethereum_provider.is_deposit_approved(token, 1)
 
@@ -152,4 +153,3 @@ class TestEthereumProvider(IsolatedAsyncioTestCase):
 class TestZkLinkProvider(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.provider = ZkLinkProviderV01(provider=HttpJsonRPCTransport(network=testnet))
-

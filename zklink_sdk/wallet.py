@@ -285,7 +285,7 @@ class Wallet:
         resolved_token = self.tokens.find(token)
         if resolved_token is not None:
             return resolved_token
-        self.tokens = await self.zk_provider.get_tokens()
+        self.tokens = await self.zk_provider.get_support_tokens()
         resolved_token = self.tokens.find(token)
         if resolved_token is None:
             raise TokenNotFoundError
