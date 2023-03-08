@@ -52,11 +52,11 @@ class Wallet:
                                       fast_processing: bool = False) -> Transaction:
         return await self.zk_provider.submit_tx(tx, eth_signature, fast_processing)
 
-    async def send_txs_batch(self, transactions: List[TransactionWithSignature],
-                             signatures: Optional[
-                                 Union[List[TxEthSignature], TxEthSignature]
-                             ] = None) -> List[Transaction]:
-        return await self.zk_provider.submit_txs_batch(transactions, signatures)
+    # async def send_txs_batch(self, transactions: List[TransactionWithSignature],
+    #                          signatures: Optional[
+    #                              Union[List[TxEthSignature], TxEthSignature]
+    #                          ] = None) -> List[Transaction]:
+    #     return await self.zk_provider.submit_txs_batch(transactions, signatures)
 
     async def set_signing_key(self, fee_token: TokenLike, *,
                               eth_auth_data: Union[ChangePubKeyCREATE2, ChangePubKeyEcdsa, None] = None,
@@ -226,44 +226,44 @@ class Wallet:
                                                             valid_until)
         return await self.send_signed_transaction(transfer, eth_signature)
 
-    async def get_order(self, token_sell: TokenLike, token_buy: TokenLike,
-                        ratio: Fraction, ratio_type: RatioType, amount: Decimal,
-                        recipient: Optional[str] = None,
-                        nonce: Optional[int] = None,
-                        valid_from=DEFAULT_VALID_FROM,
-                        valid_until=DEFAULT_VALID_UNTIL) -> Order:
-        if nonce is None:
-            nonce = await self.zk_provider.get_account_nonce(self.address())
-        token_sell_obj = await self.resolve_token(token_sell)
-        token_buy_obj = await self.resolve_token(token_buy)
-        recipient = recipient or self.address()
+    # async def get_order(self, token_sell: TokenLike, token_buy: TokenLike,
+    #                     ratio: Fraction, ratio_type: RatioType, amount: Decimal,
+    #                     recipient: Optional[str] = None,
+    #                     nonce: Optional[int] = None,
+    #                     valid_from=DEFAULT_VALID_FROM,
+    #                     valid_until=DEFAULT_VALID_UNTIL) -> Order:
+    #     if nonce is None:
+    #         nonce = await self.zk_provider.get_account_nonce(self.address())
+    #     token_sell_obj = await self.resolve_token(token_sell)
+    #     token_buy_obj = await self.resolve_token(token_buy)
+    #     recipient = recipient or self.address()
+    #
+    #     if ratio_type == RatioType.token:
+    #         ratio = token_ratio_to_wei_ratio(ratio, token_sell_obj, token_buy_obj)
+    #
+    #     account_id = await self.get_account_id()
+    #
+    #     order = Order(account_id=account_id, recipient=recipient,
+    #                   token_sell=token_sell_obj,
+    #                   token_buy=token_buy_obj,
+    #                   ratio=ratio,
+    #                   amount=token_sell_obj.from_decimal(amount),
+    #                   nonce=nonce,
+    #                   valid_from=valid_from,
+    #                   valid_until=valid_until)
+    #
+    #     order.eth_signature = self.eth_signer.sign_tx(order)
+    #     order.signature = self.zk_signer.sign_tx(order)
+    #
+    #     return order
 
-        if ratio_type == RatioType.token:
-            ratio = token_ratio_to_wei_ratio(ratio, token_sell_obj, token_buy_obj)
-
-        account_id = await self.get_account_id()
-
-        order = Order(account_id=account_id, recipient=recipient,
-                      token_sell=token_sell_obj,
-                      token_buy=token_buy_obj,
-                      ratio=ratio,
-                      amount=token_sell_obj.from_decimal(amount),
-                      nonce=nonce,
-                      valid_from=valid_from,
-                      valid_until=valid_until)
-
-        order.eth_signature = self.eth_signer.sign_tx(order)
-        order.signature = self.zk_signer.sign_tx(order)
-
-        return order
-
-    async def get_limit_order(self, token_sell: TokenLike, token_buy: TokenLike,
-                              ratio: Fraction, ratio_type: RatioType,
-                              recipient: Optional[str] = None,
-                              valid_from=DEFAULT_VALID_FROM,
-                              valid_until=DEFAULT_VALID_UNTIL):
-        return await self.get_order(token_sell, token_buy, ratio, ratio_type, Decimal(0), recipient, valid_from,
-                                    valid_until)
+    # async def get_limit_order(self, token_sell: TokenLike, token_buy: TokenLike,
+    #                           ratio: Fraction, ratio_type: RatioType,
+    #                           recipient: Optional[str] = None,
+    #                           valid_from=DEFAULT_VALID_FROM,
+    #                           valid_until=DEFAULT_VALID_UNTIL):
+    #     return await self.get_order(token_sell, token_buy, ratio, ratio_type, Decimal(0), recipient, valid_from,
+    #                                 valid_until)
 
     # This function takes as a parameter the integer amount/fee of
     # lowest token denominations (wei, satoshi, etc.)

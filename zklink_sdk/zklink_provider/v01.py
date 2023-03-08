@@ -35,29 +35,29 @@ class ZkLinkProviderV01(ZkLinkProviderInterface):
                         ) for token in data.values()]
         return Tokens(tokens=tokens)
 
-    async def submit_txs_batch(self, transactions: List[TransactionWithSignature],
-                               signatures: Optional[
-                                   Union[List[TxEthSignature], TxEthSignature]
-                               ] = None) -> List[Transaction]:
-        if signatures is None:
-            signatures = []
-        elif isinstance(signatures, TxEthSignature):
-            signatures = [signatures]
-        transactions = [tr.dict() for tr in transactions]
-        signatures = [sig.dict() for sig in signatures]
-        trans_ids: List[str] = await self.provider.request("submit_txs_batch", [transactions, signatures])
-        return [Transaction.build_transaction(self, trans_id) for trans_id in trans_ids]
+    # async def submit_txs_batch(self, transactions: List[TransactionWithSignature],
+    #                            signatures: Optional[
+    #                                Union[List[TxEthSignature], TxEthSignature]
+    #                            ] = None) -> List[Transaction]:
+    #     if signatures is None:
+    #         signatures = []
+    #     elif isinstance(signatures, TxEthSignature):
+    #         signatures = [signatures]
+    #     transactions = [tr.dict() for tr in transactions]
+    #     signatures = [sig.dict() for sig in signatures]
+    #     trans_ids: List[str] = await self.provider.request("submit_txs_batch", [transactions, signatures])
+    #     return [Transaction.build_transaction(self, trans_id) for trans_id in trans_ids]
 
-    async def submit_batch_builder_txs_batch(self, transactions: List[TransactionWithOptionalSignature],
-                                             signature: TxEthSignature) -> List[Transaction]:
-        trans = [tr.dict() for tr in transactions]
-        params = [trans, signature.dict()]
-        trans_ids: List[str] = await self.provider.request("submit_txs_batch", params)
-        return [Transaction.build_transaction(self, trans_id) for trans_id in trans_ids]
+    # async def submit_batch_builder_txs_batch(self, transactions: List[TransactionWithOptionalSignature],
+    #                                          signature: TxEthSignature) -> List[Transaction]:
+    #     trans = [tr.dict() for tr in transactions]
+    #     params = [trans, signature.dict()]
+    #     trans_ids: List[str] = await self.provider.request("submit_txs_batch", params)
+    #     return [Transaction.build_transaction(self, trans_id) for trans_id in trans_ids]
 
-    async def get_contract_address(self) -> ContractAddress:
-        data = await self.provider.request("contract_address", None)
-        return ContractAddress(**data)
+    # async def get_contract_address(self) -> ContractAddress:
+    #     data = await self.provider.request("contract_address", None)
+    #     return ContractAddress(**data)
 
     async def get_state(self, address: str) -> AccountState:
         data = await self.provider.request("account_info", [address])
@@ -68,8 +68,8 @@ class ZkLinkProviderV01(ZkLinkProviderInterface):
             data["accountType"] = 'No2FA'
         return AccountState(**data)
 
-    async def get_confirmations_for_eth_op_amount(self) -> int:
-        return await self.provider.request("get_confirmations_for_eth_op_amount", None)
+    # async def get_confirmations_for_eth_op_amount(self) -> int:
+    #     return await self.provider.request("get_confirmations_for_eth_op_amount", None)
 
     async def get_account_nonce(self, address: str) -> int:
         state = await self.get_state(address)
@@ -78,22 +78,22 @@ class ZkLinkProviderV01(ZkLinkProviderInterface):
     async def get_tx_receipt(self, address: str) -> TransactionDetails:
         return await self.provider.request("tx_info", [address])
 
-    async def get_eth_tx_for_withdrawal(self, withdrawal_hash: str) -> str:
-        return await self.provider.request("get_eth_tx_for_withdrawal", [withdrawal_hash])
+    # async def get_eth_tx_for_withdrawal(self, withdrawal_hash: str) -> str:
+    #     return await self.provider.request("get_eth_tx_for_withdrawal", [withdrawal_hash])
 
-    async def get_priority_op_status(self, serial_id: int) -> EthOpInfo:
-        data = await self.provider.request("ethop_info", [serial_id])
-        return EthOpInfo(**data)
+    # async def get_priority_op_status(self, serial_id: int) -> EthOpInfo:
+    #     data = await self.provider.request("ethop_info", [serial_id])
+    #     return EthOpInfo(**data)
 
     # Please note that the batch fee returns the fee of the transaction in int and not in Fee
     # This is a server-side feature
-    async def get_transactions_batch_fee(self, tx_types: List[FeeTxType], addresses: List[str],
-                                         token_like) -> int:
-
-        data = await self.provider.request('get_txs_batch_fee_in_wei',
-                                           [[tx_type.value for tx_type in tx_types],
-                                            addresses, token_like])
-        return int(data["totalFee"])
+    # async def get_transactions_batch_fee(self, tx_types: List[FeeTxType], addresses: List[str],
+    #                                      token_like) -> int:
+    #
+    #     data = await self.provider.request('get_txs_batch_fee_in_wei',
+    #                                        [[tx_type.value for tx_type in tx_types],
+    #                                         addresses, token_like])
+    #     return int(data["totalFee"])
 
     async def get_transaction_fee(self, tx_type: FeeTxType, address: str,
                                   token_like: TokenLike) -> Fee:
@@ -101,9 +101,9 @@ class ZkLinkProviderV01(ZkLinkProviderInterface):
         data = await self.provider.request('get_tx_fee', [tx_type.value, address, token_like])
         return Fee(**data)
 
-    async def get_token_price(self, token: Token) -> Decimal:
-        data = await self.provider.request('get_token_price', [token.symbol])
-        return Decimal(data)
+    # async def get_token_price(self, token: Token) -> Decimal:
+    #     data = await self.provider.request('get_token_price', [token.symbol])
+    #     return Decimal(data)
 
     async def toggle_2fa(self, toggle2fa: Toggle2FA) -> bool:
         data = await self.provider.request('toggle_2fa', [toggle2fa.dict()])
