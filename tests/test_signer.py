@@ -5,7 +5,7 @@ from web3 import Account
 
 from zklink_sdk import ZkLinkLibrary, EthereumSignerWeb3
 from zklink_sdk.serializers import closest_packable_amount, closest_packable_transaction_fee
-from zklink_sdk.types import ChainId, Order, ChangePubKey, ForcedExit, Token, Transfer, Withdraw, Tokens, \
+from zklink_sdk.types import ChainId, Order, OrderMatching, ChangePubKey, ForcedExit, Token, Transfer, Withdraw, Tokens, \
     EncodedTxValidator
 from zklink_sdk.zklink_signer import ZkLinkSigner
 
@@ -88,6 +88,7 @@ class ZkLinkSignerTest(TestCase):
                       token=Token(id=42, address='', symbol='', decimals=18),
                       amount=1000000000000000000, fee=238000000000000,
                       nonce=3, timestamp=1670830922, account_id=15)
+
         res = signer.sign_tx(tr)
         assert res.signature == '0ffe0eaef99542f1476c88cb4a0ec0de04382ae9db23070ba299d4dfe9d6a3939356fe614775d837d34c6e5ac3074ecf8ee3ccafab53f8f3d521900930f7af04'
 
@@ -105,6 +106,30 @@ class ZkLinkSignerTest(TestCase):
         assert tr.encoded_message().hex() == res
         sig = signer.sign_order(tr)
         assert sig.signature == '7e00ed99c8be5e7ac9d9e2e1c5bf8ed6a5e28f1c91a0891d89a0eecd57ea411acc86a9e2073486235c0941b0666d928c109802e2a971571f3a7e845fcc087e01'
+
+    def test_order_matching(self):
+        account = Account.from_key("0505050505050505050505050505050505050505050505050505050505050505")
+        signer = ZkLinkSigner.from_account(account, self.library)
+        maker = Order(account_id=6, price=1500000000000000000, amount=100000000000000000000,
+                      sub_account_id=1, slot=1, nonce=1,
+                      base_token=Token(id=32, address='', symbol='', decimals=18),
+                      quote_token=Token(id=1, address='', symbol='', decimals=18),
+                      is_sell=0, taker_fee_ratio=10, maker_fee_ratio=5)
+        taker = Order(account_id=6, price=1500000000000000000, amount=1000000000000000000,
+                      sub_account_id=1, slot=3, nonce=0,
+                      base_token=Token(id=32, address='', symbol='', decimals=18),
+                      quote_token=Token(id=1, address='', symbol='', decimals=18),
+                      is_sell=1, taker_fee_ratio=10, maker_fee_ratio=5)
+        tr = OrderMatching(account_id=6, sub_account_id=1, taker=taker,
+                           maker=maker, fee=0,
+                           fee_token=Token(id=1, address='', symbol='', decimals=18),
+                           expect_base_amount=1000000000000000000,
+                           expect_quote_amount=1500000000000000000)
+
+        res = "08000000060183be69c82b2c56df952594436bd024ce85ed2eaee63dadb5b3a3e1aec623880001000000000000000000000de0b6b3a7640000000000000000000014d1120d7b160000"
+        assert tr.encoded_message().hex() == res
+        sig = signer.sign_order(tr)
+        assert sig.signature == 'ec7493d6151fbe1673f8bfefc4f5544b86eeef7010b0bc3500d4036f7e36a0a1e1a31f28015fd27258ad5782c0676b97bda3a4380284903e15eec6b2c7836105'
 
 
 def check_bytes(a, b):
