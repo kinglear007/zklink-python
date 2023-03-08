@@ -83,11 +83,6 @@ class BlockInfo(BaseModel):
         alias_generator = to_camel
 
 
-class EthOpInfo(BaseModel):
-    executed: bool
-    block: BlockInfo
-
-
 class TransactionDetails(BaseModel):
     executed: bool
     success: bool

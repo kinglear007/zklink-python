@@ -9,7 +9,7 @@ from zklink_sdk.types import (ChangePubKey, ChangePubKeyCREATE2, ChangePubKeyEcd
                               ChangePubKeyTypes, EncodedTx, ForcedExit, Token, TokenLike,
                               Tokens, TransactionWithSignature, Transfer, TxEthSignature,
                               Withdraw, Order, RatioType, SubmitSignature,
-                              token_ratio_to_wei_ratio, get_toggle_message, get_toggle_message_with_pub, Toggle2FA)
+                              token_ratio_to_wei_ratio,)
 from zklink_sdk.zklink_provider import FeeTxType, ZkLinkProviderInterface
 from zklink_sdk.zklink_signer import ZkLinkSigner
 from zklink_sdk.zklink_provider.transaction import Transaction
@@ -51,12 +51,6 @@ class Wallet:
                                       eth_signature: Optional[TxEthSignature],
                                       submitter_signature: Optional[SubmitSignature] = None) -> Transaction:
         return await self.zk_provider.submit_tx(tx, eth_signature, submitter_signature)
-
-    # async def send_txs_batch(self, transactions: List[TransactionWithSignature],
-    #                          signatures: Optional[
-    #                              Union[List[TxEthSignature], TxEthSignature]
-    #                          ] = None) -> List[Transaction]:
-    #     return await self.zk_provider.submit_txs_batch(transactions, signatures)
 
     async def set_signing_key(self, fee_token: TokenLike, *,
                               eth_auth_data: Union[ChangePubKeyCREATE2, ChangePubKeyEcdsa, None] = None,
@@ -226,45 +220,6 @@ class Wallet:
                                                             valid_until)
         return await self.send_signed_transaction(transfer, eth_signature)
 
-    # async def get_order(self, token_sell: TokenLike, token_buy: TokenLike,
-    #                     ratio: Fraction, ratio_type: RatioType, amount: Decimal,
-    #                     recipient: Optional[str] = None,
-    #                     nonce: Optional[int] = None,
-    #                     valid_from=DEFAULT_VALID_FROM,
-    #                     valid_until=DEFAULT_VALID_UNTIL) -> Order:
-    #     if nonce is None:
-    #         nonce = await self.zk_provider.get_account_nonce(self.address())
-    #     token_sell_obj = await self.resolve_token(token_sell)
-    #     token_buy_obj = await self.resolve_token(token_buy)
-    #     recipient = recipient or self.address()
-    #
-    #     if ratio_type == RatioType.token:
-    #         ratio = token_ratio_to_wei_ratio(ratio, token_sell_obj, token_buy_obj)
-    #
-    #     account_id = await self.get_account_id()
-    #
-    #     order = Order(account_id=account_id, recipient=recipient,
-    #                   token_sell=token_sell_obj,
-    #                   token_buy=token_buy_obj,
-    #                   ratio=ratio,
-    #                   amount=token_sell_obj.from_decimal(amount),
-    #                   nonce=nonce,
-    #                   valid_from=valid_from,
-    #                   valid_until=valid_until)
-    #
-    #     order.eth_signature = self.eth_signer.sign_tx(order)
-    #     order.signature = self.zk_signer.sign_tx(order)
-    #
-    #     return order
-
-    # async def get_limit_order(self, token_sell: TokenLike, token_buy: TokenLike,
-    #                           ratio: Fraction, ratio_type: RatioType,
-    #                           recipient: Optional[str] = None,
-    #                           valid_from=DEFAULT_VALID_FROM,
-    #                           valid_until=DEFAULT_VALID_UNTIL):
-    #     return await self.get_order(token_sell, token_buy, ratio, ratio_type, Decimal(0), recipient, valid_from,
-    #                                 valid_until)
-
     # This function takes as a parameter the integer amount/fee of
     # lowest token denominations (wei, satoshi, etc.)
     async def build_withdraw(self, eth_address: str, amount: int, token: Token,
@@ -335,35 +290,3 @@ class Wallet:
         if resolved_token is None:
             raise TokenNotFoundError
         return resolved_token
-
-    # async def enable_2fa(self) -> bool:
-    #     mil_seconds = int(time.time() * 1000)
-    #     msg = get_toggle_message(True, mil_seconds)
-    #     eth_sig = self.eth_signer.sign(msg.encode())
-    #     account_id = await self.get_account_id()
-    #     toggle = Toggle2FA(True,
-    #                        account_id,
-    #                        mil_seconds,
-    #                        eth_sig,
-    #                        None
-    #                        )
-    #     return await self.zk_provider.toggle_2fa(toggle)
-
-    # async def disable_2fa(self, pub_key_hash: Optional[str]) -> bool:
-    #     mil_seconds = int(time.time() * 1000)
-    #     if pub_key_hash is None:
-    #         msg = get_toggle_message(False, mil_seconds)
-    #     else:
-    #         msg = get_toggle_message_with_pub(False, mil_seconds, pub_key_hash)
-    #     eth_sig = self.eth_signer.sign(msg.encode())
-    #     account_id = await self.get_account_id()
-    #     toggle = Toggle2FA(False,
-    #                        account_id,
-    #                        mil_seconds,
-    #                        eth_sig,
-    #                        pub_key_hash)
-    #     return await self.zk_provider.toggle_2fa(toggle)
-
-    # async def disable_2fa_with_pub_key(self):
-    #     pub_key_hash = self.zk_signer.pubkey_hash_str()
-    #     return await self.disable_2fa(pub_key_hash)

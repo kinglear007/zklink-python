@@ -288,7 +288,6 @@ class Transfer(EncodedTx):
             msg += f"Transfer {self.token.decimal_str_amount(self.amount)} {self.token.symbol} to: {self.to_address.lower()}\n"
         if self.fee != 0:
             msg += f"Fee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\n"
-
         return msg + f"Nonce: {self.nonce}"
 
     def encoded_message(self) -> bytes:
@@ -431,7 +430,6 @@ class ForcedExit(EncodedTx):
         msg += f"ForcedExit {self.l2_source_token.symbol} to: {self.target.lower()}\n"
         if self.fee != 0:
             msg += f"Fee: {self.fee_token.decimal_str_amount(self.fee)} {self.fee_token.symbol}\n"
-
         return msg + f"Nonce: {self.nonce}"
 
     def dict(self):
@@ -529,30 +527,10 @@ class TransactionWithSignature:
 @dataclass()
 class TransactionWithOptionalSignature:
     tx: EncodedTx
-    signature: Union[None, TxEthSignature, List[TxSignature]] = None
+    signature: Optional[TxEthSignature] = None
 
     def dict(self):
-        if self.signature is None:
-            null_value = None
-            return {
-                'signature': null_value,
-                'tx': self.tx.dict()
-            }
-        else:
-            if isinstance(self.signature, list):
-                null_value = None
-                value = []
-                for sig in self.signature:
-                    if sig is None:
-                        value.append(null_value)
-                    else:
-                        value.append(sig.dict())
-                return {
-                    'signature': value,
-                    'tx': self.tx.dict()
-                }
-            else:
-                return {
-                    'signature': self.signature.dict(),
-                    'tx': self.tx.dict()
-                }
+        return {
+            'signature': self.signature.dict() if self.signature is not None else None,
+            'tx': self.tx.dict()
+        }

@@ -8,7 +8,6 @@ from web3 import Account, HTTPProvider, Web3
 
 from zklink_sdk import (EthereumProvider, EthereumSignerWeb3, HttpJsonRPCTransport, Wallet, ZkLink,
                         ZkLinkLibrary, ZkLinkProviderV01, ZkLinkSigner, )
-from zklink_sdk.zklink_provider.batch_builder import BatchBuilder
 # from zklink_sdk.network import rinkeby
 from zklink_sdk.network import testnet
 from zklink_sdk.types import ChangePubKeyEcdsa, Token, TransactionWithSignature, \
@@ -85,82 +84,6 @@ class TestWallet(IsolatedAsyncioTestCase):
         except Exception as ex:
             assert False, str(ex)
 
-    # async def test_batch(self):
-    #     trs = []
-    #     eth_token = await self.wallet.resolve_token("ETH")
-    #     fee = (await self.wallet.zk_provider.get_transaction_fee(
-    #         FeeTxType.transfer, self.receiver_address, "ETH"
-    #     )).total_fee
-    #     nonce = await self.wallet.zk_provider.get_account_nonce(self.wallet.address())
-    #
-    #     for i in range(3):
-    #         tr, sig = await self.wallet.build_transfer(
-    #             self.receiver_address,
-    #             amount=1, token=eth_token, fee=fee, nonce=nonce + i)
-    #         trs.append(TransactionWithSignature(tr, sig))
-    #     res = await self.wallet.send_txs_batch(trs)
-    #     self.assertEqual(len(res), 3)
-    #     for i, tr in enumerate(res):
-    #         try:
-    #             result = await tr.await_committed(attempts=100, attempts_timeout=500)
-    #             self.assertEqual(result.status, TransactionStatus.COMMITTED)
-    #         except Exception as ex:
-    #             assert False, f"test_batch, getting transaction {i}  result has failed with error: {ex}"
-
-    # async def test_build_batch_transfer(self):
-    #     nonce = await self.wallet.zk_provider.get_account_nonce(self.wallet.address())
-    #     builder = BatchBuilder.from_wallet(self.wallet, nonce)
-    #     for i in range(2):
-    #         builder.add_transfer(self.receiver_address, "ETH", Decimal("0.00005"))
-    #     build_result = await builder.build()
-    #     print(f"Total fees: {build_result.total_fees}")
-    #     transactions = await self.wallet.zk_provider.submit_batch_builder_txs_batch(build_result.transactions,
-    #                                                                                 build_result.signature)
-    #     for i, tran in enumerate(transactions):
-    #         try:
-    #             result = await tran.await_committed(attempts=1000, attempts_timeout=1000)
-    #             self.assertEqual(result.status, TransactionStatus.COMMITTED)
-    #         except Exception as ex:
-    #             assert False, f"test_build_batch_transfer, transaction {i} " \
-    #                           f"has failed with error: {ex}"
-
-    # async def test_build_batch_change_pub_key(self):
-    #     nonce = await self.wallet.zk_provider.get_account_nonce(self.wallet.address())
-    #     builder = BatchBuilder.from_wallet(self.wallet, nonce)
-    #     builder.add_change_pub_key("ETH", eth_auth_type=ChangePubKeyEcdsa())
-    #     builder.add_transfer(self.receiver_address, "USDT", Decimal("0.001"))
-    #     build_result = await builder.build()
-    #     print(f"Total fees: {build_result.total_fees}")
-    #     transactions = await self.wallet.zk_provider.submit_batch_builder_txs_batch(build_result.transactions,
-    #                                                                                 build_result.signature)
-    #     self.assertEqual(len(transactions), 2)
-    #     for i, tran in enumerate(transactions):
-    #         try:
-    #             result = await tran.await_committed(attempts=100, attempts_timeout=1000)
-    #             self.assertEqual(result.status, TransactionStatus.COMMITTED)
-    #         except Exception as ex:
-    #             assert False, f"test_build_batch_change_pub_key, transaction {i} " \
-    #                           f"has failed with error: {ex}"
-
-    # async def test_build_batch_withdraw(self):
-    #     nonce = await self.wallet.zk_provider.get_account_nonce(self.wallet.address())
-    #     builder = BatchBuilder.from_wallet(self.wallet, nonce)
-    #     builder.add_withdraw(self.receiver_address,
-    #                          "USDT",
-    #                          Decimal("0.000001")
-    #                          )
-    #     build_result = await builder.build()
-    #     print(f"Total fees: {build_result.total_fees}")
-    #     transactions = await self.wallet.zk_provider.submit_batch_builder_txs_batch(build_result.transactions,
-    #                                                                                 build_result.signature)
-    #     self.assertEqual(len(transactions), 1)
-    #
-    #     try:
-    #         result = await transactions[0].await_committed(attempts=100, attempts_timeout=1000)
-    #         self.assertEqual(result.status, TransactionStatus.COMMITTED)
-    #     except Exception as ex:
-    #         assert False, f"test_build_batch_withdraw, transaction has failed with error: {ex}"
-
     async def test_forced_exit(self):
         result_transaction = await self.wallet.transfer(self.forced_exit_account_address, Decimal("0.1"), "USDC")
         result = await result_transaction.await_committed()
@@ -187,26 +110,6 @@ class TestWallet(IsolatedAsyncioTestCase):
 
     async def test_is_signing_key_set(self):
         assert await self.wallet.is_signing_key_set()
-
-    # async def test_toggle_2fa(self):
-    #     """
-    #     Relate to the server-side code it must be Owned type if enable_2fa is passed
-    #     let new_type = if toggle_2fa.enable {
-    #         EthAccountType::Owned
-    #     } else {
-    #         EthAccountType::No2FA
-    #     };
-    #     """
-    #     result = await self.wallet.enable_2fa()
-    #     self.assertTrue(result)
-    #     account_state = await self.wallet.get_account_state()
-    #     self.assertEqual(AccountTypes.OWNED, account_state.account_type)
-    #
-    #     pub_key_hash = self.wallet.zk_signer.pubkey_hash_str()
-    #     result = await self.wallet.disable_2fa(pub_key_hash)
-    #     self.assertTrue(result)
-    #     account_state = await self.wallet.get_account_state()
-    #     self.assertEqual(AccountTypes.NO_2FA, account_state.account_type)
 
 
 class TestEthereumProvider(IsolatedAsyncioTestCase):
@@ -250,7 +153,3 @@ class TestZkLinkProvider(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.provider = ZkLinkProviderV01(provider=HttpJsonRPCTransport(network=testnet))
 
-    # async def test_get_token_price(self):
-    #     tokens = await self.provider.get_tokens()
-    #     price = await self.provider.get_token_price(tokens.find_by_symbol("USDC"))
-    #     self.assertAlmostEqual(float(price), 1.0, delta=0.2)
