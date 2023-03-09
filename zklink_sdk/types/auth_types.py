@@ -12,15 +12,9 @@ class ChangePubKeyTypes(Enum):
 
 @dataclass
 class ChangePubKeyEcdsa:
-    batch_hash: bytes = b"\x00" * 32
-
-    def encode_message(self) -> bytes:
-        return self.batch_hash
-
     def dict(self, signature: str):
         return {"type": "ECDSA",
-                "ethSignature": signature,
-                "batchHash": f"0x{self.batch_hash.hex()}"}
+                "ethSignature": signature}
 
 
 @dataclass
@@ -34,6 +28,7 @@ class ChangePubKeyCREATE2:
 
     def dict(self):
         return {"type": "CREATE2",
+                "creatorAddress": self.creator_address,
                 "saltArg": f"0x{self.salt_arg.hex()}",
                 "codeHash": f"0x{self.code_hash.hex()}"}
 

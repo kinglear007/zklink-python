@@ -26,7 +26,7 @@ class ZkLinkProviderInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_contract_address(self) -> ContractAddress:
+    async def get_contract_address(self, chain_id: int) -> ContractAddress:
         raise NotImplementedError
 
     @abstractmethod

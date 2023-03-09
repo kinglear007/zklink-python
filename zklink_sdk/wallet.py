@@ -52,7 +52,7 @@ class Wallet:
                                       submitter_signature: Optional[SubmitSignature] = None) -> Transaction:
         return await self.zk_provider.submit_tx(tx, eth_signature, submitter_signature)
 
-    async def set_signing_key(self, fee_token: TokenLike, *,
+    async def set_signing_key(self, chain_id: int, fee_token: TokenLike, *,
                               eth_auth_data: Union[ChangePubKeyCREATE2, ChangePubKeyEcdsa, None] = None,
                               fee: Optional[Decimal] = None, nonce: Optional[int] = None,
                               valid_from=DEFAULT_VALID_FROM, valid_until=DEFAULT_VALID_UNTIL):
@@ -85,7 +85,7 @@ class Wallet:
             fee_int = fee_token_obj.from_decimal(fee)
 
         change_pub_key, eth_signature = await self.build_change_pub_key(fee_token_obj,
-                                                                        eth_auth_data, fee_int,
+                                                                        eth_auth_data, fee_int, chain_id,
                                                                         nonce,
                                                                         valid_from,
                                                                         valid_until)
@@ -99,6 +99,7 @@ class Wallet:
             fee_token: Token,
             eth_auth_data: Union[ChangePubKeyCREATE2, ChangePubKeyEcdsa, None],
             fee: int,
+            chain_id: int,
             nonce: Optional[int] = None,
             valid_from=DEFAULT_VALID_FROM,
             valid_until=DEFAULT_VALID_UNTIL):
@@ -118,8 +119,10 @@ class Wallet:
             valid_from=valid_from,
             eth_auth_data=eth_auth_data
         )
+        contract = await self.zk_provider.get_contract_address(chain_id)
 
-        eth_signature = self.eth_signer.sign(change_pub_key.get_eth_tx_bytes())
+        eth_signature = self.eth_signer.sign(change_pub_key.get_eth_tx_bytes(contract.main_contract, contract.layer1_chain_id))
+
         eth_auth_data = change_pub_key.get_auth_data(eth_signature.signature)
 
         change_pub_key.eth_auth_data = eth_auth_data

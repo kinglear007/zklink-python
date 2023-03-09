@@ -66,6 +66,16 @@ class ZkLinkProviderV01(ZkLinkProviderInterface):
         state = await self.get_state(address)
         return state.get_nonce()
 
+    async def get_contract_address(self, chain_id: str) -> ContractAddress:
+        data = await self.provider.request("getSupportChains", None)
+        for chain in data:
+            if chain['chainId'] == chain_id:
+                return ContractAddress(
+                    chain_id=chain['chainId'],
+                    layer1_chain_id=chain['layerOneChainId'],
+                    main_contract=chain['mainContract'],
+                    gov_contract='')
+
     async def get_tx_receipt(self, address: str) -> TransactionDetails:
         return await self.provider.request("tx_info", [address])
 

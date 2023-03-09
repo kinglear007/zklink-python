@@ -212,14 +212,14 @@ class ChangePubKey(EncodedTx):
             serialize_timestamp(self.timestamp)
         ])
 
-    def get_eth_tx_bytes(self) -> bytes:
+    def get_eth_tx_bytes(self, main_contract: str, layer1_chain_id: int) -> bytes:
         data = b"".join([
             serialize_address(self.new_pk_hash),
             serialize_nonce(self.nonce),
             serialize_account_id(self.account_id),
+            serialize_address(main_contract),
+            serialize_chain_id(layer1_chain_id),
         ])
-        if self.eth_auth_data is not None:
-            data += self.eth_auth_data.encode_message()
         return data
 
     def get_auth_data(self, signature: str):
