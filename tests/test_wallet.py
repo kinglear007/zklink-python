@@ -52,7 +52,7 @@ class TestWallet(IsolatedAsyncioTestCase):
         self.wallets = [await self.get_wallet(key) for key in self.private_keys]
 
     async def test_get_account_state(self):
-        data = await self.wallet.zk_provider.get_state(self.wallet.address())
+        data = await self.wallet.zk_provider.get_account(self.wallet.address())
         assert data.address.lower() == self.wallet.address().lower()
 
     async def test_deposit(self):
@@ -64,8 +64,8 @@ class TestWallet(IsolatedAsyncioTestCase):
         assert res
 
     async def test_change_pubkey(self):
-        trans = await self.wallet.set_signing_key(1, Token(symbol="ETH", id=0, address="", chain_id=1, decimals=18),
-                                                  eth_auth_data=ChangePubKeyEcdsa())
+        trans = await self.wallet.change_pubkey(1, Token(symbol="ETH", id=0, address="", chain_id=1, decimals=18),
+                                                eth_auth_data=ChangePubKeyEcdsa())
         try:
             result = await trans.await_committed(attempts=1000, attempts_timeout=1000)
             self.assertEqual(result.status, TransactionStatus.COMMITTED)

@@ -36,7 +36,7 @@ class Transaction:
             if attempts is not None:
                 if attempts <= 0:
                     return status
-            transaction_details = await self.provider.get_tx_receipt(self.transaction_hash)
+            transaction_details = await self.provider.get_transaction_by_hash(self.transaction_hash)
             if attempts is not None:
                 attempts -= 1
             if "failReason" in transaction_details and transaction_details["failReason"] is not None:
@@ -59,7 +59,7 @@ class Transaction:
                 if attempts <= 0:
                     return intermediate_status
 
-            transaction_details = await self.provider.get_tx_receipt(self.transaction_hash)
+            transaction_details = await self.provider.get_transaction_by_hash(self.transaction_hash)
             if attempts is not None:
                 attempts -= 1
             if "failReason" in transaction_details and transaction_details["failReason"] is not None:

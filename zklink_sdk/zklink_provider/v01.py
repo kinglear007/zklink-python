@@ -4,10 +4,11 @@ from typing import List, Optional, Union
 from web3 import Web3
 
 from zklink_sdk.types import (AccountState, ContractAddress, ContractAddresses, EncodedTx, Fee, Token,
-                              TokenLike, Tokens, TransactionDetails, TransactionWithSignature,
+                              Tokens, TransactionDetails, TransactionWithSignature,
                               TransactionWithOptionalSignature,
-                              TxEthSignature, SubmitSignature)
-from zklink_sdk.zklink_provider.error import AccountDoesNotExist
+                              TxEthSignature, SubmitSignature,
+                              ChangePubKey, ForcedExit, Withdraw, Transfer)
+from zklink_sdk.zklink_provider.error import AccountDoesNotExist, AccountBalancesDoesNotExist
 from zklink_sdk.zklink_provider.interface import ZkLinkProviderInterface
 from zklink_sdk.zklink_provider.types import FeeTxType
 from zklink_sdk.zklink_provider.transaction import Transaction
@@ -53,19 +54,6 @@ class ZkLinkProviderV01(ZkLinkProviderInterface):
             gov_contract='') for chain in data]
         return ContractAddresses(addresses=addresses)
 
-    async def get_state(self, address: str) -> AccountState:
-        data = await self.provider.request("account_info", [address])
-        if data is None:
-            raise AccountDoesNotExist(address=address)
-        if "accountType" in data and isinstance(data["accountType"], dict) and \
-                list(data["accountType"].keys())[0] == 'No2FA':
-            data["accountType"] = 'No2FA'
-        return AccountState(**data)
-
-    async def get_account_nonce(self, address: str) -> int:
-        state = await self.get_state(address)
-        return state.get_nonce()
-
     async def get_contract_address(self, chain_id: str) -> ContractAddress:
         data = await self.provider.request("getSupportChains", None)
         for chain in data:
@@ -76,11 +64,28 @@ class ZkLinkProviderV01(ZkLinkProviderInterface):
                     main_contract=chain['mainContract'],
                     gov_contract='')
 
-    async def get_tx_receipt(self, address: str) -> TransactionDetails:
-        return await self.provider.request("tx_info", [address])
+    async def get_account(self, address: str) -> AccountState:
+        data = await self.provider.request("getAccount", [address])
+        if data is None:
+            raise AccountDoesNotExist(address=address)
+        if "accountType" in data and isinstance(data["accountType"], dict) and \
+                list(data["accountType"].keys())[0] == 'No2FA':
+            data["accountType"] = 'No2FA'
+        return AccountState(**data)
 
-    async def get_transaction_fee(self, tx_type: FeeTxType, address: str,
-                                  token_like: TokenLike) -> Fee:
+    async def get_account_nonce(self, address: str) -> int:
+        state = await self.get_account(address)
+        return state.get_nonce()
 
-        data = await self.provider.request('get_tx_fee', [tx_type.value, address, token_like])
+    async def get_account_balances(self, account_id: int, sub_account_id: int):
+        data = await self.provider.request("getAccountBalances", [account_id, sub_account_id])
+        if data is None:
+            raise AccountBalancesDoesNotExist(account_id=account_id, sub_account_id=sub_account_id)
+        return data.get(sub_account_id)
+
+    async def get_transaction_by_hash(self, tx_hash: str, include_update: bool = True) -> TransactionDetails:
+        return await self.provider.request("getTransactionByHash", [tx_hash, include_update])
+
+    async def estimate_transaction_fee(self, tx: Union[ChangePubKey, ForcedExit, Withdraw, Transfer]) -> Fee:
+        data = await self.provider.request('estimateTransactionFee', [tx])
         return Fee(**data)

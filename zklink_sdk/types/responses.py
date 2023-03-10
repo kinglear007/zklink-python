@@ -42,16 +42,20 @@ class AccountState(BaseModel):
     address: str
     id: Optional[int]
     account_type: Optional[AccountTypes]
-    depositing: Optional[Depositing]
-    committed: Optional[State]
-    verified: Optional[State]
+    pub_key_hash: str
+    nonce: int
+
+    # depositing: Optional[Depositing]
+    # committed: Optional[State]
+    # verified: Optional[State]
 
     class Config:
         alias_generator = to_camel
 
     def get_nonce(self) -> int:
-        assert self.committed is not None, "`get_nonce` needs `committed` to be set"
-        return self.committed.nonce
+        # assert self.committed is not None, "`get_nonce` needs `committed` to be set"
+        # return self.committed.nonce
+        return self.nonce
 
 
 class Fee(BaseModel):

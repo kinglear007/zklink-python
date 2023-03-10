@@ -3,9 +3,10 @@ from decimal import Decimal
 from typing import List, Optional, Union
 from zklink_sdk.transport import JsonRPCTransport
 from zklink_sdk.types import (AccountState, ContractAddress, EncodedTx, Fee, Token,
-                              TokenLike, Tokens, TransactionDetails, TransactionWithSignature,
+                              Tokens, TransactionDetails, TransactionWithSignature,
                               TransactionWithOptionalSignature,
-                              TxEthSignature, SubmitSignature)
+                              TxEthSignature, SubmitSignature,
+                              ChangePubKey, ForcedExit, Withdraw, Transfer)
 from zklink_sdk.zklink_provider.types import FeeTxType
 from zklink_sdk.zklink_provider.transaction import Transaction
 
@@ -30,7 +31,7 @@ class ZkLinkProviderInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_state(self, address: str) -> AccountState:
+    async def get_account(self, address: str) -> AccountState:
         raise NotImplementedError
 
     @abstractmethod
@@ -38,10 +39,13 @@ class ZkLinkProviderInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_tx_receipt(self, address: str) -> TransactionDetails:
+    async def get_account_balances(self, account_id: int, sub_account_id: int):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_transaction_fee(self, tx_type: FeeTxType, address: str,
-                                  token_like: TokenLike) -> Fee:
+    async def get_transaction_by_hash(self, tx_hash: str, include_update: bool) -> TransactionDetails:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def estimate_transaction_fee(self, tx: Union[ChangePubKey, ForcedExit, Withdraw, Transfer]) -> Fee:
         raise NotImplementedError

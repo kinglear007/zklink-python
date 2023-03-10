@@ -42,7 +42,7 @@ class Wallet:
 
     async def get_account_id(self):
         if self.account_id is None:
-            state = await self.zk_provider.get_state(self.address())
+            state = await self.zk_provider.get_account(self.address())
             if isinstance(state.id, int):
                 self.account_id = state.id
         return self.account_id
@@ -52,34 +52,20 @@ class Wallet:
                                       submitter_signature: Optional[SubmitSignature] = None) -> Transaction:
         return await self.zk_provider.submit_tx(tx, eth_signature, submitter_signature)
 
-    async def set_signing_key(self, chain_id: int, fee_token: Token, *,
-                              eth_auth_data: Union[ChangePubKeyCREATE2, ChangePubKeyEcdsa, None] = None,
-                              fee: Optional[Decimal] = None, nonce: Optional[int] = None,
-                              valid_from=DEFAULT_VALID_FROM, valid_until=DEFAULT_VALID_UNTIL):
+    async def change_pubkey(self, chain_id: int, fee_token: Token, *,
+                            eth_auth_data: Union[ChangePubKeyCREATE2, ChangePubKeyEcdsa, None] = None,
+                            fee: Optional[Decimal] = None, nonce: Optional[int] = None,
+                            valid_from=DEFAULT_VALID_FROM, valid_until=DEFAULT_VALID_UNTIL):
         if nonce is None:
             nonce = await self.zk_provider.get_account_nonce(self.address())
-        if isinstance(eth_auth_data, ChangePubKeyEcdsa):
-            eth_auth_type = ChangePubKeyTypes.ecdsa
-        elif isinstance(eth_auth_data, ChangePubKeyCREATE2):
-            eth_auth_type = ChangePubKeyTypes.create2
-        else:
-            eth_auth_type = ChangePubKeyTypes.onchain
 
         if fee is None:
-            if eth_auth_type == ChangePubKeyTypes.ecdsa:
-                fee_obj = await self.zk_provider.get_transaction_fee(FeeTxType.change_pub_key_ecdsa,
-                                                                     self.address(),
-                                                                     fee_token.id)
-            elif eth_auth_type == ChangePubKeyTypes.onchain:
-                fee_obj = await self.zk_provider.get_transaction_fee(FeeTxType.change_pub_key_onchain,
-                                                                     self.address(),
-                                                                     fee_token.id)
-            else:
-                assert eth_auth_type == ChangePubKeyTypes.create2, "invalid eth_auth_type"
-                fee_obj = await self.zk_provider.get_transaction_fee(FeeTxType.change_pub_key_create2,
-                                                                     self.address(),
-                                                                     fee_token.id)
-            fee_int = fee_obj.total_fee
+            change_pub_key, _ = await self.build_change_pub_key(fee_token,
+                                                                eth_auth_data, 0, chain_id,
+                                                                nonce,
+                                                                valid_from,
+                                                                valid_until)
+            fee_int = await self.zk_provider.estimate_transaction_fee(change_pub_key)
         else:
             fee_int = fee_token.from_decimal(fee)
 
@@ -135,15 +121,17 @@ class Wallet:
                           valid_from=DEFAULT_VALID_FROM, valid_until=DEFAULT_VALID_UNTIL) -> Transaction:
         nonce = await self.zk_provider.get_account_nonce(self.address())
         if fee is None:
-            fee_obj = await self.zk_provider.get_transaction_fee(FeeTxType.withdraw, target, token.id)
-            fee_int = fee_obj.total_fee
+            forced_exit, _ = await self.build_forced_exit(target, token, 0, nonce,
+                                                          valid_from, valid_until)
+
+            fee_int = await self.zk_provider.estimate_transaction_fee(forced_exit)
         else:
             fee_int = token.from_decimal(fee)
 
-        transfer, eth_signature = await self.build_forced_exit(target, token, fee_int, nonce,
-                                                               valid_from, valid_until)
+        forced_exit, eth_signature = await self.build_forced_exit(target, token, fee_int, nonce,
+                                                                  valid_from, valid_until)
 
-        return await self.send_signed_transaction(transfer, eth_signature)
+        return await self.send_signed_transaction(forced_exit, eth_signature)
 
     # This function takes as a parameter the integer fee of 
     # lowest token denominations (wei, satoshi, etc.)
@@ -209,13 +197,14 @@ class Wallet:
                        valid_from=DEFAULT_VALID_FROM, valid_until=DEFAULT_VALID_UNTIL) -> Transaction:
         nonce = await self.zk_provider.get_account_nonce(self.address())
 
+        amount_int = token.from_decimal(amount)
+
         if fee is None:
-            fee_obj = await self.zk_provider.get_transaction_fee(FeeTxType.transfer, to, token.id)
-            fee_int = fee_obj.total_fee
+            transfer, _ = await self.build_transfer(to, amount_int, token, 0, nonce, valid_from,
+                                                    valid_until)
+            fee_int = await self.zk_provider.estimate_transaction_fee(transfer)
         else:
             fee_int = token.from_decimal(fee)
-
-        amount_int = token.from_decimal(amount)
 
         transfer, eth_signature = await self.build_transfer(to, amount_int, token, fee_int, nonce, valid_from,
                                                             valid_until)
@@ -248,35 +237,32 @@ class Wallet:
                        fee: Optional[Decimal] = None, fast: bool = False,
                        valid_from=DEFAULT_VALID_FROM, valid_until=DEFAULT_VALID_UNTIL) -> Transaction:
         nonce = await self.zk_provider.get_account_nonce(self.address())
+
+        amount_int = token.from_decimal(amount)
+
         if fee is None:
-            tx_type = FeeTxType.fast_withdraw if fast else FeeTxType.withdraw
-            fee_obj = await self.zk_provider.get_transaction_fee(tx_type, eth_address, token.id)
-            fee_int = fee_obj.total_fee
+            withdraw, _ = await self.build_withdraw(eth_address, amount_int, token, 0, nonce,
+                                                    valid_from, valid_until)
+            fee_int = await self.zk_provider.estimate_transaction_fee(withdraw)
         else:
             fee_int = token.from_decimal(fee)
-        amount_int = token.from_decimal(amount)
 
         withdraw, eth_signature = await self.build_withdraw(eth_address, amount_int, token, fee_int, nonce,
                                                             valid_from, valid_until)
-        return await self.send_signed_transaction(withdraw, eth_signature, fast)
+        return await self.send_signed_transaction(withdraw, eth_signature)
 
-    async def get_balance(self, token: Token, type: str):
-        account_state = await self.get_account_state()
+    async def get_balance(self, sub_account_id: int, token: Token):
+        account_balances = await self.zk_provider.get_account_balances(self.account_id, sub_account_id)
 
-        if type == "committed":
-            token_balance = account_state.committed.balances.get(token.symbol)
-        else:
-            token_balance = account_state.verified.balances.get(token.symbol)
+        token_balance = account_balances.get(token.id)
         if token_balance is None:
             token_balance = 0
         return token_balance
 
     async def get_account_state(self):
-        return await self.zk_provider.get_state(self.address())
+        return await self.zk_provider.get_account(self.address())
 
     async def is_signing_key_set(self) -> bool:
         account_state = await self.get_account_state()
         signer_pub_key_hash = self.zk_signer.pubkey_hash_str()
-        return account_state.id is not None and \
-               account_state.committed.pub_key_hash == signer_pub_key_hash
-
+        return account_state.id is not None and account_state.pub_key_hash == signer_pub_key_hash
