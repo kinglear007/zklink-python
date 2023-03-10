@@ -56,7 +56,7 @@ class TestWallet(IsolatedAsyncioTestCase):
         assert data.address.lower() == self.wallet.address().lower()
 
     async def test_deposit(self):
-        token = await self.wallet.resolve_token("USDT")
+        token = Token(symbol="USDT", id=0, address="", chain_id=1, decimals=18)
         await self.wallet.ethereum_provider.approve_deposit(token, Decimal(1))
 
         res = await self.wallet.ethereum_provider.deposit(token, Decimal(1),
@@ -64,7 +64,8 @@ class TestWallet(IsolatedAsyncioTestCase):
         assert res
 
     async def test_change_pubkey(self):
-        trans = await self.wallet.set_signing_key("ETH", eth_auth_data=ChangePubKeyEcdsa())
+        trans = await self.wallet.set_signing_key(1, Token(symbol="ETH", id=0, address="", chain_id=1, decimals=18),
+                                                  eth_auth_data=ChangePubKeyEcdsa())
         try:
             result = await trans.await_committed(attempts=1000, attempts_timeout=1000)
             self.assertEqual(result.status, TransactionStatus.COMMITTED)
@@ -79,7 +80,8 @@ class TestWallet(IsolatedAsyncioTestCase):
 
     async def test_transfer(self):
         tr = await self.wallet.transfer(self.receiver_address,
-                                        amount=Decimal("0.01"), token="USDC")
+                                        amount=Decimal("0.01"),
+                                        token=Token(symbol="USDC", id=0, address="", chain_id=1, decimals=18))
         try:
             result = await tr.await_committed(attempts=20, attempts_timeout=100)
             self.assertEqual(result.status, TransactionStatus.COMMITTED)
@@ -87,10 +89,12 @@ class TestWallet(IsolatedAsyncioTestCase):
             assert False, str(ex)
 
     async def test_forced_exit(self):
-        result_transaction = await self.wallet.transfer(self.forced_exit_account_address, Decimal("0.1"), "USDC")
+        result_transaction = await self.wallet.transfer(self.forced_exit_account_address, Decimal("0.1"),
+                                                        Token(symbol="USDC", id=0, address="", chain_id=1, decimals=18))
         result = await result_transaction.await_committed()
         self.assertEqual(result.status, TransactionStatus.COMMITTED)
-        tr = await self.wallet.forced_exit(self.forced_exit_account_address, "USDC")
+        tr = await self.wallet.forced_exit(self.forced_exit_account_address,
+                                           Token(symbol="USDC", id=0, address="", chain_id=1, decimals=18))
         try:
             result = await tr.await_verified(attempts=10, attempts_timeout=1000)
             self.assertEqual(result.status, TransactionStatus.COMMITTED)
@@ -99,7 +103,8 @@ class TestWallet(IsolatedAsyncioTestCase):
 
     async def test_withdraw(self):
         tr = await self.wallet.withdraw(self.receiver_address,
-                                        Decimal("0.000001"), "USDT")
+                                        Decimal("0.000001"),
+                                        Token(symbol="USDC", id=0, address="", chain_id=1, decimals=18))
         try:
             result = await tr.await_committed(attempts=30, attempts_timeout=100)
             self.assertEqual(result.status, TransactionStatus.COMMITTED)
