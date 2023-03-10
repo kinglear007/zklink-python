@@ -72,9 +72,7 @@ class Transaction:
 
             if "block" in transaction_details:
                 block = transaction_details["block"]
-                if block is not None and \
-                        "verified" in block and \
-                        block["verified"]:
+                if block is not None and "verified" in block and block["verified"]:
                     return TransactionResult(TransactionStatus.VERIFIED, "")
 
             if attempts_timeout is not None:

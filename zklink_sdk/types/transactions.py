@@ -1,5 +1,6 @@
 import abc
 import hashlib
+from abc import ABC
 from dataclasses import dataclass
 from decimal import Decimal
 from fractions import Fraction
@@ -141,7 +142,7 @@ class Order(BaseModel):
             packed_amount_checked(self.amount),
         ])
 
-    def dict(self):
+    def to_dict(self):
         return {
             "accountId": self.account_id,
             "subAccountId": self.sub_account_id,
@@ -185,7 +186,7 @@ class EncodedTx(abc.ABC):
 
 
 @dataclass
-class ChangePubKey(EncodedTx):
+class ChangePubKey(EncodedTx, ABC):
     chain_id: int
     account_id: int
     sub_account_id: int
@@ -255,7 +256,7 @@ class ChangePubKey(EncodedTx):
 
 
 @dataclass
-class Transfer(EncodedTx):
+class Transfer(EncodedTx, ABC):
     account_id: int
     from_sub_account_id: int
     to_address: str
@@ -313,7 +314,7 @@ class Transfer(EncodedTx):
 
 
 @dataclass
-class Withdraw(EncodedTx):
+class Withdraw(EncodedTx, ABC):
     to_chain_id: int
     account_id: int
     sub_account_id: int
@@ -380,7 +381,7 @@ class Withdraw(EncodedTx):
 
 
 @dataclass
-class ForcedExit(EncodedTx):
+class ForcedExit(EncodedTx, ABC):
     to_chain_id: int
     initiator_account_id: int
     initiator_sub_account_id: int
@@ -443,7 +444,7 @@ class ForcedExit(EncodedTx):
 
 
 @dataclass
-class OrderMatching(EncodedTx):
+class OrderMatching(EncodedTx, ABC):
     account_id: int
     sub_account_id: int
     taker: Order
@@ -475,8 +476,8 @@ class OrderMatching(EncodedTx):
             "type": "OrderMatching",
             "accountId": self.account_id,
             "subAccountId": self.sub_account_id,
-            "taker": self.taker.dict(),
-            "maker": self.maker.dict(),
+            "taker": self.taker.to_dict(),
+            "maker": self.maker.to_dict(),
             "feeToken": self.fee_token.id,
             "fee": str(self.fee),
             "expectBaseAmount": str(self.expect_base_amount),

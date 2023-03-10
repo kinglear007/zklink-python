@@ -8,7 +8,6 @@ from web3 import Account, HTTPProvider, Web3
 
 from zklink_sdk import (EthereumProvider, EthereumSignerWeb3, HttpJsonRPCTransport, Wallet, ZkLink,
                         ZkLinkLibrary, ZkLinkProviderV01, ZkLinkSigner, )
-# from zklink_sdk.network import rinkeby
 from zklink_sdk.network import testnet
 from zklink_sdk.types import ChangePubKeyEcdsa, Token, TransactionWithSignature, \
     TransactionWithOptionalSignature, RatioType, Transfer, AccountTypes
@@ -27,8 +26,6 @@ class TestWallet(IsolatedAsyncioTestCase):
     ]
     receiver_address = "0x21dDF51966f2A66D03998B0956fe59da1b3a179F"
     forced_exit_account_address = "0x21dDF51966f2A66D03998B0956fe59da1b3aFFFE"
-
-    # nft_transfer_account_address = "0x995a8b7f96cb837533b79775b6209696d51f435c"
 
     async def get_wallet(self, private_key: str) -> Wallet:
         account = Account.from_key(private_key)
