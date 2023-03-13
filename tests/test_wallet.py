@@ -1,5 +1,4 @@
 from decimal import Decimal
-from fractions import Fraction
 from unittest import IsolatedAsyncioTestCase
 from zklink_sdk.zklink_provider.types import FeeTxType
 from zklink_sdk.types.responses import Fee
@@ -8,7 +7,7 @@ from web3 import Account, HTTPProvider, Web3
 
 from zklink_sdk import (EthereumProvider, EthereumSignerWeb3, HttpJsonRPCTransport, Wallet, ZkLink,
                         ZkLinkLibrary, ZkLinkProviderV01, ZkLinkSigner, )
-from zklink_sdk.network import testnet
+from zklink_sdk.network import testnet, devnet
 from zklink_sdk.types import ChangePubKeyEcdsa, Token, TransactionWithSignature, \
     TransactionWithOptionalSignature, RatioType, Transfer, AccountTypes
 from zklink_sdk.zklink_provider.transaction import TransactionStatus
@@ -17,12 +16,6 @@ from zklink_sdk.zklink_provider.transaction import TransactionStatus
 class TestWallet(IsolatedAsyncioTestCase):
     # 0x995a8b7f96cb837533b79775b6209696d51f435c
     private_key = "0xa045b52470d306ff78e91b0d2d92f90f7504189125a46b69423dc673fd6b4f3e"
-    private_keys = [
-        # 0x800455ca06265d0cf742086663a527d7c08049fc
-        "0x601b47729b2820e94bc10125edc8d534858827428b449175a275069dc00c303f",
-        # 0x3aa03b5bcba43eebcb98432507474ffb3423ac94
-        "0xa7adf8459b4c9a62f09e0e5390983c0145fa20e88c9e5bf837d8bf3dcd05bd9c",
-    ]
     receiver_address = "0x21dDF51966f2A66D03998B0956fe59da1b3a179F"
     forced_exit_account_address = "0x21dDF51966f2A66D03998B0956fe59da1b3aFFFE"
 
@@ -31,7 +24,7 @@ class TestWallet(IsolatedAsyncioTestCase):
         ethereum_signer = EthereumSignerWeb3(account=account)
 
         w3 = Web3(HTTPProvider(
-            endpoint_uri="https://rinkeby.infura.io/v3/bcf42e619a704151a1b0d95a35cb2e62"))
+            endpoint_uri=devnet.zklink_url))
         provider = ZkLinkProviderV01(provider=HttpJsonRPCTransport(network=testnet))
         addresses = await provider.get_support_chains()
         address = addresses.find_by_chain_id(1)
@@ -45,7 +38,6 @@ class TestWallet(IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.library = ZkLinkLibrary()
         self.wallet = await self.get_wallet(self.private_key)
-        self.wallets = [await self.get_wallet(key) for key in self.private_keys]
 
     async def test_get_account_state(self):
         data = await self.wallet.zk_provider.get_account(self.wallet.address())
@@ -138,7 +130,7 @@ class TestEthereumProvider(IsolatedAsyncioTestCase):
         self.library = ZkLinkLibrary()
 
         w3 = Web3(HTTPProvider(
-            endpoint_uri="https://rinkeby.infura.io/v3/bcf42e619a704151a1b0d95a35cb2e62"))
+            endpoint_uri=devnet.zklink_url))
         provider = ZkLinkProviderV01(provider=HttpJsonRPCTransport(network=testnet))
         addresses = await provider.get_support_chains()
         address = addresses.find_by_chain_id(1)

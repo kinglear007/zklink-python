@@ -1,17 +1,13 @@
 from unittest import TestCase
-from fractions import Fraction
 
 from web3 import Account
 
-from zklink_sdk import ZkLinkLibrary, EthereumSignerWeb3
+from zklink_sdk import ZkLinkLibrary
 from zklink_sdk.serializers import closest_packable_amount, closest_packable_transaction_fee
-from zklink_sdk.types import ChainId, Order, OrderMatching, ChangePubKey, ForcedExit, Token, Transfer, Withdraw, Tokens, \
-    EncodedTxValidator
+from zklink_sdk.types import Order, OrderMatching, ChangePubKey, ForcedExit, Token, Transfer, Withdraw
 from zklink_sdk.zklink_signer import ZkLinkSigner
 
 PRIVATE_KEY = "336b38ea188a4da28a9a3232a21359a51f6b3c5fdd844c122dd6d76d6605a4ec"
-
-import json
 
 
 class ZkLinkSignerTest(TestCase):
@@ -128,7 +124,7 @@ class ZkLinkSignerTest(TestCase):
 
         res = "08000000060183be69c82b2c56df952594436bd024ce85ed2eaee63dadb5b3a3e1aec623880001000000000000000000000de0b6b3a7640000000000000000000014d1120d7b160000"
         assert tr.encoded_message().hex() == res
-        sig = signer.sign_order(tr)
+        sig = signer.sign_tx(tr)
         assert sig.signature == 'ec7493d6151fbe1673f8bfefc4f5544b86eeef7010b0bc3500d4036f7e36a0a1e1a31f28015fd27258ad5782c0676b97bda3a4380284903e15eec6b2c7836105'
 
 

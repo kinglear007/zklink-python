@@ -1,4 +1,3 @@
-import os
 from unittest import TestCase
 
 from zklink_sdk import ZkLinkLibrary
@@ -41,13 +40,13 @@ class TestZkLinkLibrary(TestCase):
     def test_hash_orders(self):
         maker_order = Order(account_id=6, price=1500000000000000000, amount=100000000000000000000,
                             sub_account_id=1, slot=1, nonce=1,
-                            base_token=Token(id=32, address='', symbol='', decimals=18),
-                            quote_token=Token(id=1, address='', symbol='', decimals=18),
+                            base_token=Token(id=32, chain_id=0, address='', symbol='', decimals=18),
+                            quote_token=Token(id=1, chain_id=0, address='', symbol='', decimals=18),
                             is_sell=0, taker_fee_ratio=10, maker_fee_ratio=5)
         taker_order = Order(account_id=6, price=1500000000000000000, amount=1000000000000000000,
                             sub_account_id=1, slot=3, nonce=0,
-                            base_token=Token(id=32, address='', symbol='', decimals=18),
-                            quote_token=Token(id=1, address='', symbol='', decimals=18),
+                            base_token=Token(id=32, chain_id=0, address='', symbol='', decimals=18),
+                            quote_token=Token(id=1, chain_id=0, address='', symbol='', decimals=18),
                             is_sell=1, taker_fee_ratio=10, maker_fee_ratio=5)
         orders = maker_order.encoded_message() + taker_order.encoded_message()
         hash = self.library.hash_orders(orders)

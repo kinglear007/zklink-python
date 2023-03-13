@@ -21,7 +21,6 @@ from zklink_sdk.types.auth_types import ChangePubKeyCREATE2, ChangePubKeyEcdsa
 
 DEFAULT_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"
 
-
 TRANSACTION_VERSION = 0x01
 
 
@@ -177,10 +176,6 @@ class EncodedTx(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def batch_message_part(self) -> str:
-        pass
-
-    @abc.abstractmethod
     def tx_hash(self) -> str:
         pass
 
@@ -230,6 +225,9 @@ class ChangePubKey(EncodedTx, ABC):
             return self.eth_auth_data.dict(signature)
         elif isinstance(self.eth_auth_data, ChangePubKeyCREATE2):
             return self.eth_auth_data.dict()
+
+    def human_readable_message(self) -> str:
+        return ""
 
     def dict(self):
         return {
@@ -470,6 +468,9 @@ class OrderMatching(EncodedTx, ABC):
             int_to_bytes(self.expect_base_amount, 16),
             int_to_bytes(self.expect_quote_amount, 16)
         ])
+
+    def human_readable_message(self) -> str:
+        return ""
 
     def dict(self):
         return {
