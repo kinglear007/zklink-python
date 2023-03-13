@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from collections import Mapping
+from typing import Union
 
 from zklink_sdk.types import EncodedTx, TxEthSignature
 
@@ -12,7 +14,7 @@ class EthereumSignerInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def sign(self, message: bytes) -> TxEthSignature:
+    def sign(self, message: Union[bytes, Mapping]) -> TxEthSignature:
         raise NotImplementedError
 
     @abstractmethod
