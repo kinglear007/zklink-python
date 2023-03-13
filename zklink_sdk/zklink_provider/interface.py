@@ -18,8 +18,8 @@ class ZkLinkProviderInterface(ABC):
         self.provider = provider
 
     @abstractmethod
-    async def submit_tx(self, tx: EncodedTx, signature: Optional[TxEthSignature],
-                        submitter_signature: Optional[SubmitSignature] = None) -> Transaction:
+    async def send_transaction(self, tx: EncodedTx, signature: Optional[TxEthSignature],
+                               submitter_signature: Optional[SubmitSignature] = None) -> Transaction:
         raise NotImplementedError
 
     @abstractmethod

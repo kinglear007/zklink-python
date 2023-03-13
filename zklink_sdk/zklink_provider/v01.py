@@ -17,11 +17,11 @@ __all__ = ['ZkLinkProviderV01']
 
 
 class ZkLinkProviderV01(ZkLinkProviderInterface):
-    async def submit_tx(self, tx: EncodedTx, signature: Optional[TxEthSignature],
-                        submitter_signature: Optional[SubmitSignature] = None) -> Transaction:
+    async def send_transaction(self, tx: EncodedTx, signature: Optional[TxEthSignature],
+                               submitter_signature: Optional[SubmitSignature] = None) -> Transaction:
         signature = signature.dict() if signature is not None else None
         submitter_signature = submitter_signature.signature if submitter_signature is not None else None
-        trans_id = await self.provider.request("tx_submit",
+        trans_id = await self.provider.request("sendTransaction",
                                                [tx.dict(), signature, submitter_signature])
         return Transaction.build_transaction(self, trans_id)
 

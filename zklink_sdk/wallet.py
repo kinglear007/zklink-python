@@ -14,9 +14,6 @@ from zklink_sdk.zklink_provider import FeeTxType, ZkLinkProviderInterface
 from zklink_sdk.zklink_signer import ZkLinkSigner
 from zklink_sdk.zklink_provider.transaction import Transaction
 
-DEFAULT_VALID_FROM = 0
-DEFAULT_VALID_UNTIL = 2 ** 32 - 1
-
 
 class WalletError(Exception):
     pass
@@ -50,30 +47,24 @@ class Wallet:
     async def send_signed_transaction(self, tx: EncodedTx,
                                       eth_signature: Optional[TxEthSignature],
                                       submitter_signature: Optional[SubmitSignature] = None) -> Transaction:
-        return await self.zk_provider.submit_tx(tx, eth_signature, submitter_signature)
+        return await self.zk_provider.send_transaction(tx, eth_signature, submitter_signature)
 
-    async def change_pubkey(self, chain_id: int, fee_token: Token, *,
+    async def change_pubkey(self, chain_id: int, fee_token: Token, sub_account_id: int,
                             eth_auth_data: Union[ChangePubKeyCREATE2, ChangePubKeyEcdsa, None] = None,
-                            fee: Optional[Decimal] = None, nonce: Optional[int] = None,
-                            valid_from=DEFAULT_VALID_FROM, valid_until=DEFAULT_VALID_UNTIL):
+                            fee: Optional[Decimal] = None, nonce: Optional[int] = None):
         if nonce is None:
             nonce = await self.zk_provider.get_account_nonce(self.address())
 
         if fee is None:
             change_pub_key, _ = await self.build_change_pub_key(fee_token,
-                                                                eth_auth_data, 0, chain_id,
-                                                                nonce,
-                                                                valid_from,
-                                                                valid_until)
+                                                                eth_auth_data, 0, chain_id, sub_account_id, nonce)
             fee_int = await self.zk_provider.estimate_transaction_fee(change_pub_key)
         else:
             fee_int = fee_token.from_decimal(fee)
 
         change_pub_key, eth_signature = await self.build_change_pub_key(fee_token,
                                                                         eth_auth_data, fee_int, chain_id,
-                                                                        nonce,
-                                                                        valid_from,
-                                                                        valid_until)
+                                                                        sub_account_id, nonce)
 
         return await self.send_signed_transaction(change_pub_key, eth_signature)
 
@@ -85,24 +76,24 @@ class Wallet:
             eth_auth_data: Union[ChangePubKeyCREATE2, ChangePubKeyEcdsa, None],
             fee: int,
             chain_id: int,
+            sub_account_id: int,
             nonce: Optional[int] = None,
-            valid_from=DEFAULT_VALID_FROM,
-            valid_until=DEFAULT_VALID_UNTIL):
+            timestamp: int = int(time.time())):
         if nonce is None:
             nonce = await self.zk_provider.get_account_nonce(self.address())
         account_id = await self.get_account_id()
 
         new_pubkey_hash = self.zk_signer.pubkey_hash_str()
         change_pub_key = ChangePubKey(
-            account=self.address(),
+            chain_id=chain_id,
             account_id=account_id,
+            sub_account_id=sub_account_id,
             new_pk_hash=new_pubkey_hash,
-            token=fee_token,
+            fee_token=fee_token,
             fee=fee,
             nonce=nonce,
-            valid_until=valid_until,
-            valid_from=valid_from,
-            eth_auth_data=eth_auth_data
+            timestamp=timestamp,
+            eth_auth_data=eth_auth_data,
         )
         contract = await self.zk_provider.get_contract_address(chain_id)
 
@@ -117,19 +108,24 @@ class Wallet:
 
         return change_pub_key, eth_signature
 
-    async def forced_exit(self, target: str, token: Token, fee: Optional[Decimal] = None,
-                          valid_from=DEFAULT_VALID_FROM, valid_until=DEFAULT_VALID_UNTIL) -> Transaction:
+    async def forced_exit(self, to_chain_id: int, initiator_sub_account_id: int, target: str,
+                          target_sub_account_id: int, l2_source_token: Token, l1_target_token: Token,
+                          fee_token: Token, fee: Optional[Decimal] = None) -> Transaction:
         nonce = await self.zk_provider.get_account_nonce(self.address())
         if fee is None:
-            forced_exit, _ = await self.build_forced_exit(target, token, 0, nonce,
-                                                          valid_from, valid_until)
+            forced_exit, _ = await self.build_forced_exit(to_chain_id, initiator_sub_account_id, target,
+                                                          target_sub_account_id,
+                                                          l2_source_token, l1_target_token, fee_token,
+                                                          0, nonce)
 
             fee_int = await self.zk_provider.estimate_transaction_fee(forced_exit)
         else:
-            fee_int = token.from_decimal(fee)
+            fee_int = fee_token.from_decimal(fee)
 
-        forced_exit, eth_signature = await self.build_forced_exit(target, token, fee_int, nonce,
-                                                                  valid_from, valid_until)
+        forced_exit, eth_signature = await self.build_forced_exit(to_chain_id, initiator_sub_account_id, target,
+                                                                  target_sub_account_id,
+                                                                  l2_source_token, l1_target_token, fee_token,
+                                                                  fee_int, nonce)
 
         return await self.send_signed_transaction(forced_exit, eth_signature)
 
@@ -137,23 +133,33 @@ class Wallet:
     # lowest token denominations (wei, satoshi, etc.)
     async def build_forced_exit(
             self,
+            to_chain_id: int,
+            initiator_sub_account_id: int,
             target: str,
-            token: Token,
+            target_sub_account_id: int,
+            l2_source_token: Token,
+            l1_target_token: Token,
+            fee_token: Token,
             fee: int,
             nonce: Optional[int] = None,
-            valid_from=DEFAULT_VALID_FROM,
-            valid_until=DEFAULT_VALID_UNTIL) -> Tuple[ForcedExit, TxEthSignature]:
+            timestamp: int = int(time.time())) -> Tuple[ForcedExit, TxEthSignature]:
         if nonce is None:
             nonce = await self.zk_provider.get_account_nonce(self.address())
         account_id = await self.get_account_id()
 
-        forced_exit = ForcedExit(initiator_account_id=account_id,
-                                 target=target,
-                                 fee=fee,
-                                 nonce=nonce,
-                                 valid_from=valid_from,
-                                 valid_until=valid_until,
-                                 token=token)
+        forced_exit = ForcedExit(
+            to_chain_id=to_chain_id,
+            initiator_account_id=account_id,
+            initiator_sub_account_id=initiator_sub_account_id,
+            target=target,
+            target_sub_account_id=target_sub_account_id,
+            l2_source_token=l2_source_token,
+            l1_target_token=l1_target_token,
+            fee_token=fee_token,
+            fee=fee,
+            nonce=nonce,
+            timestamp=timestamp
+        )
         eth_signature = self.eth_signer.sign_tx(forced_exit)
         zk_signature = self.zk_signer.sign_tx(forced_exit)
         forced_exit.signature = zk_signature
@@ -165,14 +171,14 @@ class Wallet:
 
     async def build_transfer(
             self,
+            from_sub_account_id: int,
             to: str,
+            to_sub_account_id: int,
             amount: int,
             token: Token,
             fee: int,
             nonce: Optional[int] = None,
-            valid_from: int = DEFAULT_VALID_FROM,
-            valid_until: int = DEFAULT_VALID_UNTIL,
-    ) -> Tuple[Transfer, TxEthSignature]:
+            timestamp: int = int(time.time())) -> Tuple[Transfer, TxEthSignature]:
         """
         This function takes as a parameter the integer amount/fee of lowest token denominations (wei, satoshi, etc.)
         """
@@ -180,75 +186,92 @@ class Wallet:
             nonce = await self.zk_provider.get_account_nonce(self.address())
         account_id = await self.get_account_id()
 
-        transfer = Transfer(account_id=account_id, from_address=self.address(),
-                            to_address=to.lower(),
-                            amount=amount, fee=fee,
-                            nonce=nonce,
-                            valid_from=valid_from,
-                            valid_until=valid_until,
-                            token=token)
+        transfer = Transfer(
+            account_id=account_id,
+            from_sub_account_id=from_sub_account_id,
+            to_address=to.lower(),
+            to_sub_account_id=to_sub_account_id,
+            token=token,
+            amount=amount,
+            fee=fee,
+            nonce=nonce,
+            timestamp=timestamp,
+        )
         eth_signature = self.eth_signer.sign_tx(transfer)
         zk_signature = self.zk_signer.sign_tx(transfer)
         transfer.signature = zk_signature
         return transfer, eth_signature
 
-    async def transfer(self, to: str, amount: Decimal, token: Token,
-                       fee: Optional[Decimal] = None,
-                       valid_from=DEFAULT_VALID_FROM, valid_until=DEFAULT_VALID_UNTIL) -> Transaction:
+    async def transfer(self, from_sub_account_id: int, to: str, to_sub_account_id: int, amount: Decimal, token: Token,
+                       fee: Optional[Decimal] = None) -> Transaction:
         nonce = await self.zk_provider.get_account_nonce(self.address())
 
         amount_int = token.from_decimal(amount)
 
         if fee is None:
-            transfer, _ = await self.build_transfer(to, amount_int, token, 0, nonce, valid_from,
-                                                    valid_until)
+            transfer, _ = await self.build_transfer(from_sub_account_id, to, to_sub_account_id, amount_int, token, 0,
+                                                    nonce)
             fee_int = await self.zk_provider.estimate_transaction_fee(transfer)
         else:
             fee_int = token.from_decimal(fee)
 
-        transfer, eth_signature = await self.build_transfer(to, amount_int, token, fee_int, nonce, valid_from,
-                                                            valid_until)
+        transfer, eth_signature = await self.build_transfer(from_sub_account_id, to, to_sub_account_id, amount_int,
+                                                            token, fee_int,
+                                                            nonce)
         return await self.send_signed_transaction(transfer, eth_signature)
 
     # This function takes as a parameter the integer amount/fee of
     # lowest token denominations (wei, satoshi, etc.)
-    async def build_withdraw(self, eth_address: str, amount: int, token: Token,
+    async def build_withdraw(self, to_chain_id: int, sub_account_id: int, eth_address: str, amount: int,
+                             l2_source_token: Token,
+                             l1_target_token: Token,
                              fee: int,
+                             fast_withdraw: int,
+                             withdraw_fee_ratio: int,
                              nonce: Optional[int] = None,
-                             valid_from=DEFAULT_VALID_FROM,
-                             valid_until=DEFAULT_VALID_UNTIL):
+                             timestamp: int = int(time.time())):
         if nonce is None:
             nonce = await self.zk_provider.get_account_nonce(self.address())
         account_id = await self.get_account_id()
 
-        withdraw = Withdraw(account_id=account_id, from_address=self.address(),
-                            to_address=eth_address,
-                            amount=amount, fee=fee,
-                            nonce=nonce,
-                            valid_from=valid_from,
-                            valid_until=valid_until,
-                            token=token)
+        withdraw = Withdraw(
+            to_chain_id=to_chain_id,
+            account_id=account_id,
+            sub_account_id=sub_account_id,
+            to_address=eth_address,
+            l2_source_token=l2_source_token,
+            l1_target_token=l1_target_token,
+            amount=amount,
+            fee=fee,
+            fast_withdraw=fast_withdraw,
+            withdraw_fee_ratio=withdraw_fee_ratio,
+            nonce=nonce,
+            timestamp=timestamp
+        )
         eth_signature = self.eth_signer.sign_tx(withdraw)
         zk_signature = self.zk_signer.sign_tx(withdraw)
         withdraw.signature = zk_signature
         return withdraw, eth_signature
 
-    async def withdraw(self, eth_address: str, amount: Decimal, token: Token,
-                       fee: Optional[Decimal] = None, fast: bool = False,
-                       valid_from=DEFAULT_VALID_FROM, valid_until=DEFAULT_VALID_UNTIL) -> Transaction:
+    async def withdraw(self, to_chain_id: int, sub_account_id: int, eth_address: str, amount: Decimal,
+                       l2_source_token: Token,
+                       l1_target_token: Token, fast_withdraw: int, withdraw_fee_ratio: int,
+                       fee: Optional[Decimal] = None) -> Transaction:
         nonce = await self.zk_provider.get_account_nonce(self.address())
 
-        amount_int = token.from_decimal(amount)
+        amount_int = l2_source_token.from_decimal(amount)
 
         if fee is None:
-            withdraw, _ = await self.build_withdraw(eth_address, amount_int, token, 0, nonce,
-                                                    valid_from, valid_until)
+            withdraw, _ = await self.build_withdraw(to_chain_id, sub_account_id, eth_address, amount_int,
+                                                    l2_source_token, l1_target_token, 0,
+                                                    fast_withdraw, withdraw_fee_ratio, nonce)
             fee_int = await self.zk_provider.estimate_transaction_fee(withdraw)
         else:
-            fee_int = token.from_decimal(fee)
+            fee_int = l2_source_token.from_decimal(fee)
 
-        withdraw, eth_signature = await self.build_withdraw(eth_address, amount_int, token, fee_int, nonce,
-                                                            valid_from, valid_until)
+        withdraw, eth_signature = await self.build_withdraw(to_chain_id, sub_account_id, eth_address, amount_int,
+                                                            l2_source_token, l1_target_token, fee_int,
+                                                            fast_withdraw, withdraw_fee_ratio, nonce)
         return await self.send_signed_transaction(withdraw, eth_signature)
 
     async def get_balance(self, sub_account_id: int, token: Token):
