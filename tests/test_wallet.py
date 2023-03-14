@@ -1,5 +1,5 @@
 from decimal import Decimal
-from unittest import IsolatedAsyncioTestCase
+from unittest import IsolatedAsyncioTestCase, main
 from zklink_sdk.zklink_provider.types import FeeTxType
 from zklink_sdk.types.responses import Fee
 import asyncio
@@ -163,3 +163,7 @@ class TestEthereumProvider(IsolatedAsyncioTestCase):
 class TestZkLinkProvider(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.provider = ZkLinkProviderV01(provider=HttpJsonRPCTransport(network=testnet))
+
+
+if __name__ == "__main__":
+    main()

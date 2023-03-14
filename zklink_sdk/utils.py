@@ -5,7 +5,7 @@ DOMAIN_NAME = 'ZkLink'
 VERSION = 1
 
 
-def getChangePubkeyMessage(
+def get_change_pubkey_message(
         pubKeyHash: str,
         nonce: int,
         accountId: int,
