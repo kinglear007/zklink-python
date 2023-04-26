@@ -15,7 +15,7 @@ def derive_private_key(library: ZkLinkLibrary, message: str, account: BaseAccoun
 
 
 class ZkLinkSigner:
-    MESSAGE = "Sign this message to create a private key to interact with zkLink's layer 2 services.\nNOTE: This application is powered by zkLink's multi-chain network.\n\nOnly sign this message for a trusted client!"
+    MESSAGE = "Sign this message to create a key to interact with zkLink's layer2 services.\nNOTE: This application is powered by zkLink protocol.\n\nOnly sign this message for a trusted client!"
 
     def __init__(self, library: ZkLinkLibrary, private_key: bytes):
         self.library = library
