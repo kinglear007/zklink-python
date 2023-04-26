@@ -10,6 +10,7 @@ from zklink_sdk.types import (ChangePubKey, ChangePubKeyCREATE2, ChangePubKeyEcd
                               Tokens, TransactionWithSignature, Transfer, TxEthSignature,
                               Withdraw, Order, RatioType, SubmitSignature,
                               token_ratio_to_wei_ratio, )
+from zklink_sdk.utils import get_change_pubkey_message
 from zklink_sdk.zklink_provider import FeeTxType, ZkLinkProviderInterface
 from zklink_sdk.zklink_signer import ZkLinkSigner
 from zklink_sdk.zklink_provider.transaction import Transaction
@@ -96,9 +97,8 @@ class Wallet:
             eth_auth_data=eth_auth_data,
         )
         contract = await self.zk_provider.get_contract_address(chain_id)
-
-        eth_signature = self.eth_signer.sign(
-            change_pub_key.get_eth_tx_bytes(contract.main_contract, contract.layer1_chain_id))
+        changePubKeySignData = get_change_pubkey_message(new_pubkey_hash, nonce, account_id, contract.main_contract, contract.layer1_chain_id)
+        eth_signature = self.eth_signer.sign(changePubKeySignData)
 
         eth_auth_data = change_pub_key.get_auth_data(eth_signature.signature)
 
