@@ -297,9 +297,9 @@ def remove_address_prefix(address: str) -> str:
 def serialize_address(address: str) -> bytes:
     address = remove_address_prefix(address)
     address_bytes = bytes.fromhex(address)
-    if len(address_bytes) != 20:
+    if len(address_bytes) != 20 and len(address_bytes) != 32:
         raise WrongValueError
-    return address_bytes
+    return b'0x0' * (32 - len(address_bytes)) + address_bytes
 
 
 def serialize_content_hash(content_hash: str) -> bytes:
