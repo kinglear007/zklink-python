@@ -250,7 +250,8 @@ class ChangePubKey(EncodedTx, ABC):
         return EncodedTxType.CHANGE_PUB_KEY
 
     def tx_hash(self) -> str:
-        return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
+        # return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
+        return "0x{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
 
 
 @dataclass
@@ -308,7 +309,8 @@ class Transfer(EncodedTx, ABC):
         }
 
     def tx_hash(self) -> str:
-        return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
+        # return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
+        return "0x{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
 
 
 @dataclass
@@ -375,7 +377,8 @@ class Withdraw(EncodedTx, ABC):
         }
 
     def tx_hash(self) -> str:
-        return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
+        # return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
+        return "0x{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
 
 
 @dataclass
@@ -438,7 +441,8 @@ class ForcedExit(EncodedTx, ABC):
         }
 
     def tx_hash(self) -> str:
-        return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
+        # return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
+        return "0x{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
 
 
 @dataclass
@@ -487,7 +491,8 @@ class OrderMatching(EncodedTx, ABC):
         }
 
     def tx_hash(self) -> str:
-        return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
+        # return "sync-tx:{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
+        return "0x{}".format(hashlib.sha256(self.encoded_message()).hexdigest())
 
 
 class EncodedTxValidator:

@@ -287,9 +287,11 @@ def serialize_order_nonce(order_nonce: int):
 def remove_address_prefix(address: str) -> str:
     if address.startswith('0x'):
         return address[2:]
+    else:
+        raise WrongValueError
 
-    if address.startswith('sync:'):
-        return address[5:]
+    # if address.startswith('sync:'):
+    #     return address[5:]
 
     return address
 
@@ -299,7 +301,7 @@ def serialize_address(address: str) -> bytes:
     address_bytes = bytes.fromhex(address)
     if len(address_bytes) != 20 and len(address_bytes) != 32:
         raise WrongValueError
-    return b'0x0' * (32 - len(address_bytes)) + address_bytes
+    return b'\x00' * (32 - len(address_bytes)) + address_bytes
 
 
 def serialize_content_hash(content_hash: str) -> bytes:

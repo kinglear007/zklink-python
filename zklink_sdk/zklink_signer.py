@@ -39,7 +39,8 @@ class ZkLinkSigner:
         )
 
     def pubkey_hash_str(self):
-        return f"sync:{self.pubkey_hash().hex()}"
+        # return f"sync:{self.pubkey_hash().hex()}"
+        return f"0x{self.pubkey_hash().hex()}"
 
     def pubkey_hash(self):
         return self.library.get_pubkey_hash(self.public_key)

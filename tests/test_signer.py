@@ -17,17 +17,17 @@ class ZkLinkSignerTest(TestCase):
     def test_derive_pub_key(self):
         account = Account.from_key(PRIVATE_KEY)
         signer = ZkLinkSigner.from_account(account, self.library)
-        assert signer.public_key.hex() == "b720c6110e673b55b5725dd0ff5778a8668ef4c7324718f78fa11def63081e85"
+        assert signer.public_key.hex() == "a7fa694539b011497b6da221255e38c7a22d49731e4db3d4b3b5ca858fc07404"
 
     def test_change_pubkey_bytes(self):
         tr = ChangePubKey(chain_id=1,
                           fee_token=Token(id=1, chain_id=0, address='', symbol='', decimals=18),
                           fee=0, nonce=0, account_id=2, sub_account_id=1, timestamp=1654776640,
-                          new_pk_hash='sync:511494921e9aec60dfd65ce125dec96fe7c07133')
+                          new_pk_hash='0x511494921e9aec60dfd65ce125dec96fe7c07133')
 
-        res = "06010000000201511494921e9aec60dfd65ce125dec96fe7c07133000100000000000062a1e340"
+        res = "06010000000201000000000000000000000000511494921e9aec60dfd65ce125dec96fe7c07133000100000000000062a1e340"
         assert tr.encoded_message().hex() == res
-        hash = "sync-tx:f43ab3da7afbc99bcd05cfa1b1230e8121791ae7d11726c33a870bf2fd5b36d8"
+        hash = "0x2b015d3c2156f70208f10b6a8194fbe76a5d4ddde770421ff61d98dadecf82e2"
         assert tr.tx_hash() == hash
 
     def test_transfer_bytes(self):
@@ -37,9 +37,9 @@ class ZkLinkSignerTest(TestCase):
                       amount=1000000000000000000, fee=238000000000000,
                       nonce=3, timestamp=1670830922, account_id=15)
 
-        res = "040000000f01dddd547fa95ade4ef0c8b517da7889a5f110ea3801002a4a817c80081dcc000000036396db4a"
+        res = "040000000f01000000000000000000000000dddd547fa95ade4ef0c8b517da7889a5f110ea3801002a4a817c80081dcc000000036396db4a"
         assert tr.encoded_message().hex() == res
-        hash = "sync-tx:f73678d4fa488a846dd89f059c6f2f29b3e79fe27bb162c878e1e0bb39236c17"
+        hash = "0xb5bf0377f1cf680a08714aa23d5b95bb4f5576e0bb3a339aab6d76594434b2d1"
         assert tr.tx_hash() == hash
 
     def test_withdraw_bytes(self):
@@ -50,9 +50,9 @@ class ZkLinkSignerTest(TestCase):
                       withdraw_fee_ratio=50, account_id=16, sub_account_id=1, to_chain_id=1,
                       timestamp=1667963443)
 
-        res = "030100000010013498f456645270ee003441df82c718b56c0e66660001001200000000000000056bc75e2d63100000000000000001000032636b1a33"
+        res = "030100000010010000000000000000000000003498f456645270ee003441df82c718b56c0e66660001001200000000000000056bc75e2d63100000000000000001000032636b1a33"
         assert tr.encoded_message().hex() == res
-        hash = "sync-tx:af3da9462520230a29e6c3b72f9da95c015c4b9ca013534f49b867b3fa07ad8d"
+        hash = "0x0d0308f53c60a2b03b613619aa5fce3c793e55d72b7e7d64a677a1dd203fac5a"
         assert tr.tx_hash() == hash
 
     def test_forced_exit_bytes(self):
@@ -65,9 +65,9 @@ class ZkLinkSignerTest(TestCase):
             fee=4100000000000000, nonce=85, timestamp=1649749979
         )
 
-        res = "070100000001003498f456645270ee003441df82c718b56c0e666600000100110001334d0000005562552fdb"
+        res = "070100000001000000000000000000000000003498f456645270ee003441df82c718b56c0e666600000100110001334d0000005562552fdb"
         assert tr.encoded_message().hex() == res
-        hash = "sync-tx:5c0dee07e26608bdc1ce7f66a6fc6eefe58012e17ef38b2f224f23b52f1deca1"
+        hash = "0x48b25e383fd609d1180f21a713ae3084457269878ada1cfa25434cb226ab93ce"
         assert tr.tx_hash() == hash
 
     def test_pack(self):
@@ -86,7 +86,7 @@ class ZkLinkSignerTest(TestCase):
                       nonce=3, timestamp=1670830922, account_id=15)
 
         res = signer.sign_tx(tr)
-        assert res.signature == '0ffe0eaef99542f1476c88cb4a0ec0de04382ae9db23070ba299d4dfe9d6a3939356fe614775d837d34c6e5ac3074ecf8ee3ccafab53f8f3d521900930f7af04'
+        assert res.signature == 'fbfa2b7452f71b03a5d0eb588bbe69d7c0899686ccb74acf67104567a312bba8ca510bf4bd34b245cd8aba54229612aa9eeafc1f6a018573edef01ee26c09f02'
 
     def test_sign_order(self):
         account = Account.from_key("336b38ea188a4da28a9a3232a21359a51f6b3c5fdd844c122dd6d76d6605a4ec")
@@ -97,11 +97,11 @@ class ZkLinkSignerTest(TestCase):
                    quote_token=Token(id=7, chain_id=0, address='', symbol='', decimals=18),
                    is_sell=0, taker_fee_ratio=10, maker_fee_ratio=5)
 
-        assert signer.private_key.hex() == "03619c4116463a1b9b8ff16a77ad4dd796ac4b9771913152f72be2307f6b35d8"
+        assert signer.private_key.hex() == "02b9a5696ea4dfa045162303fdd6de20a41a0beedc2dee2d29a023f9058b9b5a"
         res = "ff00000006010001000001000600070000000000000014d1120d7b16000000050a4a817c800a"
         assert tr.encoded_message().hex() == res
         sig = signer.sign_order(tr)
-        assert sig.signature == '7e00ed99c8be5e7ac9d9e2e1c5bf8ed6a5e28f1c91a0891d89a0eecd57ea411acc86a9e2073486235c0941b0666d928c109802e2a971571f3a7e845fcc087e01'
+        assert sig.signature == 'a847e994b249c12e93105fa4e3a2200bceca5686911e658a6298b0dc8109142641d5981868cc3cde5731a7a1cf816342284e192da8bf941e592bf56491f74400'
 
     def test_order_matching(self):
         account = Account.from_key("0505050505050505050505050505050505050505050505050505050505050505")
@@ -125,7 +125,7 @@ class ZkLinkSignerTest(TestCase):
         res = "08000000060183be69c82b2c56df952594436bd024ce85ed2eaee63dadb5b3a3e1aec623880001000000000000000000000de0b6b3a7640000000000000000000014d1120d7b160000"
         assert tr.encoded_message().hex() == res
         sig = signer.sign_tx(tr)
-        assert sig.signature == 'ec7493d6151fbe1673f8bfefc4f5544b86eeef7010b0bc3500d4036f7e36a0a1e1a31f28015fd27258ad5782c0676b97bda3a4380284903e15eec6b2c7836105'
+        assert sig.signature == '7f8126c3e032cba9f0877f0ad7016b4c14e7171de50aa387f97f89611f2a11976a8ff34ed3bfa1678b52365416f62d9a4f94e29026cb1f23e0d81335c87f6601'
 
 
 def check_bytes(a, b):
