@@ -61,13 +61,12 @@ class ZkLinkSignerTest(TestCase):
             target="0x3498F456645270eE003441df82C718b56c0e6666", target_sub_account_id=0,
             l2_source_token=Token(id=1, chain_id=0, address='', symbol='', decimals=18),
             l1_target_token=Token(id=17, chain_id=0, address='', symbol='', decimals=18),
-            fee_token=Token(id=1, chain_id=0, address='', symbol='', decimals=18),
-            fee=4100000000000000, nonce=85, timestamp=1649749979
+            exit_amount=4100000000000000, initiator_nonce=85, timestamp=1649749979
         )
 
-        res = "070100000001000000000000000000000000003498f456645270ee003441df82c718b56c0e666600000100110001334d0000005562552fdb"
+        res = "070100000001000000000000000000000000003498f456645270ee003441df82c718b56c0e66660000010011000000550000000000000000000e90eda394400062552fdb"
         assert tr.encoded_message().hex() == res
-        hash = "0x48b25e383fd609d1180f21a713ae3084457269878ada1cfa25434cb226ab93ce"
+        hash = "0x7107170ae24c09a77715b63c6f931443ae9571663128729645dc26171e1b3ba7"
         assert tr.tx_hash() == hash
 
     def test_pack(self):

@@ -390,9 +390,10 @@ class ForcedExit(EncodedTx, ABC):
     target_sub_account_id: int
     l2_source_token: Token
     l1_target_token: Token
-    fee_token: Token
-    fee: int
-    nonce: int
+    # fee_token: Token
+    # fee: int
+    initiator_nonce: int
+    exit_amount: int
     timestamp: int
 
     signature: Optional[TxSignature] = None
@@ -410,18 +411,19 @@ class ForcedExit(EncodedTx, ABC):
             serialize_sub_account_id(self.target_sub_account_id),
             serialize_token_id(self.l2_source_token.id),
             serialize_token_id(self.l1_target_token.id),
-            serialize_token_id(self.fee_token.id),
-            packed_fee_checked(self.fee),
-            serialize_nonce(self.nonce),
+            # serialize_token_id(self.fee_token.id),
+            # packed_fee_checked(self.fee),
+            serialize_nonce(self.initiator_nonce),
+            int_to_bytes(self.exit_amount, length=16),
             serialize_timestamp(self.timestamp)
         ])
 
     def human_readable_message(self) -> str:
         msg = ""
         msg += f"ForcedExit {self.l2_source_token.symbol} to: {self.target.lower()}\n"
-        if self.fee != 0:
-            msg += f"Fee: {self.fee_token.decimal_str_amount(self.fee)} {self.fee_token.symbol}\n"
-        return msg + f"Nonce: {self.nonce}"
+        # if self.fee != 0:
+        #     msg += f"Fee: {self.fee_token.decimal_str_amount(self.fee)} {self.fee_token.symbol}\n"
+        return msg + f"Nonce: {self.initiator_nonce}"
 
     def dict(self):
         return {
@@ -433,9 +435,10 @@ class ForcedExit(EncodedTx, ABC):
             "targetSubAccountId": self.target_sub_account_id,
             "l2SourceToken": self.l2_source_token.id,
             "l1TargetToken": self.l1_target_token.id,
-            "feeToken": self.fee_token.id,
-            "fee": str(self.fee),
-            "nonce": self.nonce,
+            # "feeToken": self.fee_token.id,
+            # "fee": str(self.fee),
+            "initiatorNonce": self.initiator_nonce,
+            "exitAmount": self.exit_amount,
             "signature": self.signature.dict(),
             "ts": self.timestamp
         }
