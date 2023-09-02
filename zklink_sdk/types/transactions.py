@@ -123,7 +123,7 @@ class Order(BaseModel):
     is_sell: int
     maker_fee_ratio: int
     taker_fee_ratio: int
-    signature: Optional[OrderSignature]
+    signature: Optional[OrderSignature] = None
 
     def encoded_message(self) -> bytes:
         return b"".join([
